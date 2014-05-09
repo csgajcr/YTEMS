@@ -5,6 +5,8 @@ Public AppPath As String
 Public ConfigPath As String
 Public YTEMSServerIP As String
 Public YTEMSServerPort As Long
+Public mysql_conn As New ADODB.Connection
+Public mysql_rs As New ADODB.Recordset
 Public Function LoadServerIP(sConfigPath As String) As String
     LoadServerIP = ReadFromINI("YTEMS Common Config", "ServerIP", sConfigPath)
 End Function

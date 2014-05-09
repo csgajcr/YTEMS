@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "MSWINSCK.OCX"
+Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "mswinsck.ocx"
 Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.v12.0.1.ocx"
 Begin VB.Form frmMain 
    BorderStyle     =   1  'Fixed Single
@@ -60,9 +60,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-Dim mysql_conn As New ADODB.Connection
-Dim mysql_rs As New ADODB.Recordset
-Dim mysql_filed As ADODB.Field
+
 Sub InitiazationConfig()
     '初始化部分全局变量
     AppPath = IIf(Right(App.Path, 1) = "\", App.Path, App.Path & "\")
@@ -74,22 +72,30 @@ Sub InitiazationConfig()
     sckListen.Bind LoadServerPort(ConfigPath)
     sckListen.Listen
     '连接数据库
+    ConnectMySQL
+    
+    
+End Sub
+Sub ConnectMySQL()
+    On Error GoTo myerr
     mysql_conn.ConnectionString = "DRIVER={MySQL ODBC 3.51 Driver};" _
     & "SERVER=127.0.0.1;" _
-    & " DATABASE=test;" _
+    & " DATABASE=ytems;" _
     & "UID=root;PWD=670510; OPTION=3"
     mysql_conn.Open
     mysql_rs.CursorLocation = adUseClient
-    mysql_rs.Open "SELECT * FROM mytesttable ", mysql_conn
-    mysql_rs.MoveFirst
-    Do While Not mysql_rs.EOF
-        MsgBox mysql_rs("id")
-        mysql_rs.MoveNext
-    Loop
+    'mysql_rs.Open "SELECT * FROM mytesttable ", mysql_conn
+    'mysql_rs.MoveFirst
+    'Do While Not mysql_rs.EOF
+    'MsgBox mysql_rs("id")
+    'mysql_rs.MoveNext
+    'Loop
+    Exit Sub
+myerr:
     
 End Sub
-
 Private Sub Form_Load()
+    Debug.Print MD5("123456")
     InitiazationConfig
 End Sub
 

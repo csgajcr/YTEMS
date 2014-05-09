@@ -74,17 +74,19 @@ End Sub
 Private Sub cmdSave_Click()
     On Error GoTo myerr
     If txtIP.Text = "" Or txtPort.Text = "" Then Exit Sub
+    If IsNumber(txtPort.Text) = False Then
+        MsgBox "请正确输入端口号", vbCritical
+        Exit Sub
+    End If
     YTEMSServerIP = txtIP.Text
     YTEMSServerPort = CLng(txtPort.Text)
     SaveServerIP ConfigPath, txtIP.Text
     SaveServerPort ConfigPath, CLng(txtPort.Text)
     MsgBox "设置完成", vbInformation
     Unload Me
+    Exit Sub
 myerr:
-    If Err.Number = 13 Then
-        MsgBox "请正确输入端口号", vbCritical
-        Exit Sub
-    End If
+    MsgBox Err.Number & Err.Description
 End Sub
 
 Private Sub Form_Load()

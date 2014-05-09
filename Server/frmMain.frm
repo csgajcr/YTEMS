@@ -59,6 +59,10 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
+Dim mysql_conn As New ADODB.Connection
+Dim mysql_rs As New ADODB.Recordset
+Dim mysql_filed As ADODB.Field
 Sub InitiazationConfig()
     '初始化部分全局变量
     AppPath = IIf(Right(App.Path, 1) = "\", App.Path, App.Path & "\")
@@ -69,6 +73,20 @@ Sub InitiazationConfig()
     sckListen.Close
     sckListen.Bind LoadServerPort(ConfigPath)
     sckListen.Listen
+    '连接数据库
+    mysql_conn.ConnectionString = "DRIVER={MySQL ODBC 3.51 Driver};" _
+    & "SERVER=127.0.0.1;" _
+    & " DATABASE=test;" _
+    & "UID=root;PWD=670510; OPTION=3"
+    mysql_conn.Open
+    mysql_rs.CursorLocation = adUseClient
+    mysql_rs.Open "SELECT * FROM mytesttable ", mysql_conn
+    mysql_rs.MoveFirst
+    Do While Not mysql_rs.EOF
+        MsgBox mysql_rs("id")
+        mysql_rs.MoveNext
+    Loop
+    
 End Sub
 
 Private Sub Form_Load()
@@ -91,18 +109,40 @@ Private Sub sckListen_ConnectionRequest(ByVal requestID As Long)
     For i = 0 To sckServer.UBound
         If sckServer(i).State = sckClosed Then
             sckServer(i).Accept requestID
-            lstUser.AddItem sckServer(i).RemoteHostIP
-            sckServer(i).SendData "YTEMSCommand:Login Success!"
+            '------
+            lstUser.AddItem i & "-" & sckServer(i).RemoteHostIP
+            
+            '------
             Exit Sub
         End If
     Next
     Load sckServer(i)
     sckServer(i).Accept requestID
-    lstUser.AddItem sckServer(i).RemoteHostIP
-    sckServer(i).SendData "YTEMSCommand:Login Success!"
+    '-----
+    lstUser.AddItem i & "-" & sckServer(i).RemoteHostIP
+    
+    '-----
 End Sub
 
 Private Sub sckServer_Close(Index As Integer)
-    
+    sckServer(Index).Close
+    Dim i As Long
+    For i = 0 To lstUser.ListCount - 1
+        If CLng(Left(lstUser.List(i), 1)) = Index Then
+            lstUser.RemoveItem i
+        End If
+    Next
 End Sub
 
+Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
+    Dim RetData() As Byte, sData As String, sTmp() As String
+    sckServer(Index).GetData sData, vbString
+    If Left(sData, 25) = "YTEMSClientCommand-Login:" Then
+        sTmp = Split(Mid(sData, 26, Len(sData) - 25), "|")
+        If sTmp(0) = "jcr" And sTmp(1) = MD5("123456") Then
+            sckServer(Index).SendData "YTEMSCommand:Login Success!"
+        Else
+            sckServer(Index).SendData "YTEMSCommand:Login Failed!Error:Username Or Password Wrong!"
+        End If
+    End If
+End Sub

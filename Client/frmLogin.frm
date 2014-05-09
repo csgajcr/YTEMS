@@ -21,7 +21,7 @@ Begin VB.Form frmLogin
       _Version        =   393216
    End
    Begin VB.CommandButton cmdConfig 
-      Caption         =   "设置"
+      Caption         =   "设置(&S)"
       Height          =   375
       Left            =   2160
       TabIndex        =   8
@@ -29,7 +29,7 @@ Begin VB.Form frmLogin
       Width           =   1095
    End
    Begin VB.CommandButton cmdExit 
-      Caption         =   "退出"
+      Caption         =   "退出(&X)"
       Height          =   375
       Left            =   4080
       TabIndex        =   7
@@ -37,21 +37,24 @@ Begin VB.Form frmLogin
       Width           =   1095
    End
    Begin VB.CommandButton cmdLogin 
-      Caption         =   "登陆"
+      Caption         =   "登陆(&L)"
+      Default         =   -1  'True
       Height          =   375
       Left            =   240
       TabIndex        =   6
       Top             =   2280
       Width           =   1095
    End
-   Begin VB.TextBox Text2 
+   Begin VB.TextBox txtPassword 
       Height          =   270
+      IMEMode         =   3  'DISABLE
       Left            =   1200
+      PasswordChar    =   "*"
       TabIndex        =   4
       Top             =   1680
       Width           =   3975
    End
-   Begin VB.TextBox Text1 
+   Begin VB.TextBox txtUserName 
       Height          =   270
       Left            =   1200
       TabIndex        =   3
@@ -84,11 +87,11 @@ Begin VB.Form frmLogin
    Begin VB.Label Label2 
       AutoSize        =   -1  'True
       Caption         =   "用户名："
-      Height          =   255
+      Height          =   180
       Left            =   240
       TabIndex        =   2
       Top             =   975
-      Width           =   735
+      Width           =   720
    End
    Begin VB.Label lblStatus 
       AutoSize        =   -1  'True
@@ -137,6 +140,11 @@ End Sub
 Private Sub cmdLogin_Click()
     'frmMain.Show
     'Me.Hide
+    If txtUserName.Text = "" Or txtPassword.Text = "" Then
+        MsgBox "请输入用户名或密码", vbCritical
+        Exit Sub
+    End If
+    
     sckClient.Close
     sckClient.Connect YTEMSServerIP, YTEMSServerPort
     lblStatus.Caption = "正在尝试连接服务器......"
@@ -171,13 +179,28 @@ Private Sub sckClient_Close()
     Unload frmMain
 End Sub
 
+Private Sub sckClient_Connect()
+    lblStatus.Caption = "连接成功....正在等待验证..."
+    sckClient.SendData "YTEMSClientCommand-Login:" & txtUserName.Text & "|" & MD5(txtPassword.Text)
+End Sub
+
 Private Sub sckClient_DataArrival(ByVal bytesTotal As Long)
     Dim sData As String
     sckClient.GetData sData, vbString
-    If sData = "YTEMSCommand:Login Success!" Then
+    
+    Select Case sData
+    Case "YTEMSCommand:Login Success!"
+        cmdLogin.Enabled = True
+        cmdConfig.Enabled = True
         Me.Hide
         frmMain.Show
-    End If
+    Case "YTEMSCommand:Login Failed!Error:Username Or Password Wrong!"
+        MsgBox "用户名或密码错误", vbCritical
+        lblStatus.Caption = "用户名或密码错误"
+        cmdLogin.Enabled = True
+        cmdConfig.Enabled = True
+        Exit Sub
+    End Select
 End Sub
 
 Private Sub sckClient_Error(ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)

@@ -18,3 +18,17 @@ End Function
 Public Function SaveServerPort(sConfigPath As String, PortID As Long)
     WriteToINI "YTEMS Common Config", "ServerPort", PortID, sConfigPath
 End Function
+Public Function IsNumber(str As String) As Boolean
+    Dim i As Long
+    If str = "" Then
+        IsNumber = False
+        Exit Function
+    End If
+    For i = 0 To Len(str) - 1
+        If Asc(Mid(str, i + 1, 1)) > 57 Or Asc(Mid(str, i + 1, 1)) < 49 Then
+            IsNumber = False
+            Exit Function
+        End If
+    Next
+    IsNumber = True
+End Function

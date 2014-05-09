@@ -7,6 +7,7 @@ Object={BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0; Codejock.SkinFramework.v12
 Object={248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0; MSWINSCK.OCX
 Form=frmMain.frm
 Form=frmConfig.frm
+Module=ModMD5; ..\ModMD5.bas
 IconForm="frmLogin"
 Startup="frmLogin"
 HelpFile=""

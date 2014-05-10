@@ -1,5 +1,5 @@
 VERSION 5.00
-Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "mswinsck.ocx"
+Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "MSWINSCK.OCX"
 Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.v12.0.1.ocx"
 Begin VB.Form frmMain 
    BorderStyle     =   1  'Fixed Single
@@ -32,14 +32,14 @@ Begin VB.Form frmMain
    Begin MSWinsockLib.Winsock sckServer 
       Index           =   0
       Left            =   7560
-      Top             =   600
+      Top             =   840
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
    End
    Begin MSWinsockLib.Winsock sckListen 
       Left            =   7560
-      Top             =   1080
+      Top             =   1320
       _ExtentX        =   741
       _ExtentY        =   741
       _Version        =   393216
@@ -78,10 +78,13 @@ Sub InitiazationConfig()
 End Sub
 Sub ConnectMySQL()
     On Error GoTo myerr
+    Dim sServer As String, sDBName As String, sUID As String, sPassword As String
+    Dim SQLInfo As SQLConnectionInfo
+    SQLInfo = LoadSQLConnectionInfo(ConfigPath)
     mysql_conn.ConnectionString = "DRIVER={MySQL ODBC 3.51 Driver};" _
-    & "SERVER=127.0.0.1;" _
-    & " DATABASE=ytems;" _
-    & "UID=root;PWD=670510; OPTION=3"
+    & "SERVER=" & SQLInfo.IPAddress & ";" _
+    & " DATABASE=" & SQLInfo.DBName & ";" _
+    & "UID=" & SQLInfo.UID & ";PWD=" & SQLInfo.Password & "; OPTION=3"
     mysql_conn.Open
     mysql_rs.CursorLocation = adUseClient
     'mysql_rs.Open "SELECT * FROM mytesttable ", mysql_conn
@@ -92,11 +95,28 @@ Sub ConnectMySQL()
     'Loop
     Exit Sub
 myerr:
+    MsgBox "数据库连接出错，请检查数据库设置！", vbCritical
+    End
+End Sub
+
+Private Sub Form_Initialize()
+    
+    If App.PrevInstance = True Then
+        MsgBox "服务端已运行，请勿重复运行", vbInformation
+        End
+    End If
     
 End Sub
+
 Private Sub Form_Load()
-    Debug.Print MD5("123456")
+    
     InitiazationConfig
+    'tmp.DBName = "YTEMS"
+    'tmp.IPAddress = "127.0.0.1"
+    'tmp.UID = "root"
+    'tmp.Password = "670510"
+    'SaveSQLConnectionInfo ConfigPath, tmp
+    
 End Sub
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
@@ -116,7 +136,7 @@ Private Sub sckListen_ConnectionRequest(ByVal requestID As Long)
         If sckServer(i).State = sckClosed Then
             sckServer(i).Accept requestID
             '------
-            lstUser.AddItem i & "-" & sckServer(i).RemoteHostIP
+            'lstUser.AddItem i & "-" & sckServer(i).RemoteHostIP
             
             '------
             Exit Sub
@@ -125,30 +145,64 @@ Private Sub sckListen_ConnectionRequest(ByVal requestID As Long)
     Load sckServer(i)
     sckServer(i).Accept requestID
     '-----
-    lstUser.AddItem i & "-" & sckServer(i).RemoteHostIP
+    'lstUser.AddItem i & "-" & sckServer(i).RemoteHostIP
     
     '-----
 End Sub
 
 Private Sub sckServer_Close(Index As Integer)
-    sckServer(Index).Close
+    
     Dim i As Long
     For i = 0 To lstUser.ListCount - 1
-        If CLng(Left(lstUser.List(i), 1)) = Index Then
+        If lstUser.List(i) = sckServer(Index).RemoteHostIP Then
             lstUser.RemoveItem i
         End If
     Next
+    sckServer(Index).Close
 End Sub
 
 Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
-    Dim RetData() As Byte, sData As String, sTmp() As String
+    Dim RetData() As Byte, sData As String * 100, sTmp() As String
+    Dim StuInfo As StudentInformation
+    Dim sTmp2 As String * 100
     sckServer(Index).GetData sData, vbString
     If Left(sData, 25) = "YTEMSClientCommand-Login:" Then
         sTmp = Split(Mid(sData, 26, Len(sData) - 25), "|")
-        If sTmp(0) = "jcr" And sTmp(1) = MD5("123456") Then
-            sckServer(Index).SendData "YTEMSCommand:Login Success!"
+        If SQLQueryStudentInfo("tb_student", sTmp(0), StuInfo) Then
+            If Left(sTmp(1), 32) = Left(StuInfo.StuPw, 32) Then
+                
+                sTmp2 = "YTEMSCommand:Login Success!"
+                sckServer(Index).SendData sTmp2
+                sckServer(Index).SendData StuInfo.ClassNo
+                sckServer(Index).SendData StuInfo.DeptNo
+                sckServer(Index).SendData StuInfo.S_JoinYear
+                SocketSendWideChar StuInfo.StuName, 10, sckServer(Index)
+                'sckServer(Index).SendData StuInfo.StuPw
+                SocketSendWideChar StuInfo.StuSex, 10, sckServer(Index)
+                sckServer(Index).SendData StuInfo.UID
+                
+                '--------发送图片
+                SocketSendHeadPic AppPath & "UserPicture\Head.jpg", sckServer(Index)
+                lstUser.AddItem sckServer(Index).RemoteHostIP
+            Else
+                sckServer(Index).SendData "YTEMSCommand:Login Failed!Error:Username Or Password Wrong!"
+                
+            End If
         Else
             sckServer(Index).SendData "YTEMSCommand:Login Failed!Error:Username Or Password Wrong!"
+            
+        End If
+    ElseIf Left(sData, 38) = "YTEMSClientCommand:GetMoreInformation:" Then
+        Dim ClassNo As String * 10, DeptNo As String * 10
+        sTmp = Split(Mid(sData, 39, Len(sData) - 38), "|")
+        Dim StuMoreInfo As StudentMoreInfo
+        If SQLQueryStudentMoreInfo("tb_class", "tb_Dept", sTmp(0), sTmp(1), StuMoreInfo) Then
+            sTmp2 = "YTEMSCommand:StudentMoreInfo"
+            sckServer(Index).SendData sTmp2
+            SocketSendWideChar StuMoreInfo.ClassDtor, 10, sckServer(Index)
+            SocketSendWideChar StuMoreInfo.ClassName, 10, sckServer(Index)
+            SocketSendWideChar StuMoreInfo.Dept, 10, sckServer(Index)
+            SocketSendWideChar StuMoreInfo.DeptDtor, 10, sckServer(Index)
         End If
     End If
 End Sub

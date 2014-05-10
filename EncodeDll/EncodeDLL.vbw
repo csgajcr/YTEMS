@@ -1,4 +1,0 @@
-CInitWinDll = 0, 0, 0, 0, C
-ModDllMain = 0, 0, 0, 0, C
-cRijndael = 0, 0, 0, 0, C
-ModAES = 97, 52, 1024, 595, 

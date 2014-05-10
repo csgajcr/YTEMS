@@ -46,108 +46,108 @@ Private Function RShift(lValue, iShiftBits)
     End If
 End Function
 Private Function RotateLeft(lValue, iShiftBits)
-RotateLeft = LShift(lValue, iShiftBits) Or RShift(lValue, (32 - iShiftBits))
+    RotateLeft = LShift(lValue, iShiftBits) Or RShift(lValue, (32 - iShiftBits))
 End Function
 Private Function AddUnsigned(lX, lY)
-Dim lX4
-Dim lY4
-Dim lX8
-Dim lY8
-Dim lResult
-
-lX8 = lX And &H80000000
-lY8 = lY And &H80000000
-lX4 = lX And &H40000000
-lY4 = lY And &H40000000
-
-lResult = (lX And &H3FFFFFFF) + (lY And &H3FFFFFFF)
-
-If lX4 And lY4 Then
-lResult = lResult Xor &H80000000 Xor lX8 Xor lY8
-ElseIf lX4 Or lY4 Then
-If lResult And &H40000000 Then
-lResult = lResult Xor &HC0000000 Xor lX8 Xor lY8
-Else
-lResult = lResult Xor &H40000000 Xor lX8 Xor lY8
-End If
-Else
-lResult = lResult Xor lX8 Xor lY8
-End If
-
-AddUnsigned = lResult
+    Dim lX4
+    Dim lY4
+    Dim lX8
+    Dim lY8
+    Dim lResult
+    
+    lX8 = lX And &H80000000
+    lY8 = lY And &H80000000
+    lX4 = lX And &H40000000
+    lY4 = lY And &H40000000
+    
+    lResult = (lX And &H3FFFFFFF) + (lY And &H3FFFFFFF)
+    
+    If lX4 And lY4 Then
+        lResult = lResult Xor &H80000000 Xor lX8 Xor lY8
+    ElseIf lX4 Or lY4 Then
+        If lResult And &H40000000 Then
+            lResult = lResult Xor &HC0000000 Xor lX8 Xor lY8
+        Else
+            lResult = lResult Xor &H40000000 Xor lX8 Xor lY8
+        End If
+    Else
+        lResult = lResult Xor lX8 Xor lY8
+    End If
+    
+    AddUnsigned = lResult
 End Function
 Private Function md5_F(x, y, z)
     md5_F = (x And y) Or ((Not x) And z)
 End Function
 Private Function md5_G(x, y, z)
-md5_G = (x And z) Or (y And (Not z))
+    md5_G = (x And z) Or (y And (Not z))
 End Function
 Private Function md5_H(x, y, z)
-md5_H = (x Xor y Xor z)
+    md5_H = (x Xor y Xor z)
 End Function
 Private Function md5_I(x, y, z)
-md5_I = (y Xor (x Or (Not z)))
+    md5_I = (y Xor (x Or (Not z)))
 End Function
 Private Sub md5_FF(a, b, c, d, x, s, ac)
-a = AddUnsigned(a, AddUnsigned(AddUnsigned(md5_F(b, c, d), x), ac))
-a = RotateLeft(a, s)
-a = AddUnsigned(a, b)
+    a = AddUnsigned(a, AddUnsigned(AddUnsigned(md5_F(b, c, d), x), ac))
+    a = RotateLeft(a, s)
+    a = AddUnsigned(a, b)
 End Sub
 Private Sub md5_GG(a, b, c, d, x, s, ac)
-a = AddUnsigned(a, AddUnsigned(AddUnsigned(md5_G(b, c, d), x), ac))
-a = RotateLeft(a, s)
-a = AddUnsigned(a, b)
+    a = AddUnsigned(a, AddUnsigned(AddUnsigned(md5_G(b, c, d), x), ac))
+    a = RotateLeft(a, s)
+    a = AddUnsigned(a, b)
 End Sub
 Private Sub md5_HH(a, b, c, d, x, s, ac)
-a = AddUnsigned(a, AddUnsigned(AddUnsigned(md5_H(b, c, d), x), ac))
-a = RotateLeft(a, s)
-a = AddUnsigned(a, b)
+    a = AddUnsigned(a, AddUnsigned(AddUnsigned(md5_H(b, c, d), x), ac))
+    a = RotateLeft(a, s)
+    a = AddUnsigned(a, b)
 End Sub
 Private Sub md5_II(a, b, c, d, x, s, ac)
-a = AddUnsigned(a, AddUnsigned(AddUnsigned(md5_I(b, c, d), x), ac))
-a = RotateLeft(a, s)
-a = AddUnsigned(a, b)
+    a = AddUnsigned(a, AddUnsigned(AddUnsigned(md5_I(b, c, d), x), ac))
+    a = RotateLeft(a, s)
+    a = AddUnsigned(a, b)
 End Sub
 Private Function ConvertToWordArray(sMessage)
-Dim lMessageLength
-Dim lNumberOfWords
-Dim lWordArray()
-Dim lBytePosition
-Dim lByteCount
-Dim lWordCount
-
-Const MODULUS_BITS = 512
-Const CONGRUENT_BITS = 448
-
-lMessageLength = Len(sMessage)
-
-lNumberOfWords = (((lMessageLength + ((MODULUS_BITS - CONGRUENT_BITS) \ BITS_TO_A_BYTE)) \ (MODULUS_BITS \ BITS_TO_A_BYTE)) + 1) * (MODULUS_BITS \ BITS_TO_A_WORD)
-ReDim lWordArray(lNumberOfWords - 1)
-
-lBytePosition = 0
-lByteCount = 0
-Do Until lByteCount >= lMessageLength
-lWordCount = lByteCount \ BYTES_TO_A_WORD
-lBytePosition = (lByteCount Mod BYTES_TO_A_WORD) * BITS_TO_A_BYTE
-lWordArray(lWordCount) = lWordArray(lWordCount) Or LShift(Asc(Mid(sMessage, lByteCount + 1, 1)), lBytePosition)
-lByteCount = lByteCount + 1
-Loop
-lWordCount = lByteCount \ BYTES_TO_A_WORD
-lBytePosition = (lByteCount Mod BYTES_TO_A_WORD) * BITS_TO_A_BYTE
-lWordArray(lWordCount) = lWordArray(lWordCount) Or LShift(&H80, lBytePosition)
-lWordArray(lNumberOfWords - 2) = LShift(lMessageLength, 3)
-lWordArray(lNumberOfWords - 1) = RShift(lMessageLength, 29)
-
-ConvertToWordArray = lWordArray
+    Dim lMessageLength
+    Dim lNumberOfWords
+    Dim lWordArray()
+    Dim lBytePosition
+    Dim lByteCount
+    Dim lWordCount
+    
+    Const MODULUS_BITS = 512
+    Const CONGRUENT_BITS = 448
+    
+    lMessageLength = Len(sMessage)
+    
+    lNumberOfWords = (((lMessageLength + ((MODULUS_BITS - CONGRUENT_BITS) \ BITS_TO_A_BYTE)) \ (MODULUS_BITS \ BITS_TO_A_BYTE)) + 1) * (MODULUS_BITS \ BITS_TO_A_WORD)
+    ReDim lWordArray(lNumberOfWords - 1)
+    
+    lBytePosition = 0
+    lByteCount = 0
+    Do Until lByteCount >= lMessageLength
+        lWordCount = lByteCount \ BYTES_TO_A_WORD
+        lBytePosition = (lByteCount Mod BYTES_TO_A_WORD) * BITS_TO_A_BYTE
+        lWordArray(lWordCount) = lWordArray(lWordCount) Or LShift(Asc(Mid(sMessage, lByteCount + 1, 1)), lBytePosition)
+        lByteCount = lByteCount + 1
+    Loop
+    lWordCount = lByteCount \ BYTES_TO_A_WORD
+    lBytePosition = (lByteCount Mod BYTES_TO_A_WORD) * BITS_TO_A_BYTE
+    lWordArray(lWordCount) = lWordArray(lWordCount) Or LShift(&H80, lBytePosition)
+    lWordArray(lNumberOfWords - 2) = LShift(lMessageLength, 3)
+    lWordArray(lNumberOfWords - 1) = RShift(lMessageLength, 29)
+    
+    ConvertToWordArray = lWordArray
 End Function
 Private Function WordToHex(lValue)
-Dim lByte
-Dim lCount
-
-For lCount = 0 To 3
-lByte = RShift(lValue, lCount * BITS_TO_A_BYTE) And m_lOnBits(BITS_TO_A_BYTE - 1)
-WordToHex = WordToHex & Right("0" & Hex(lByte), 2)
-Next
+    Dim lByte
+    Dim lCount
+    
+    For lCount = 0 To 3
+        lByte = RShift(lValue, lCount * BITS_TO_A_BYTE) And m_lOnBits(BITS_TO_A_BYTE - 1)
+        WordToHex = WordToHex & Right("0" & Hex(lByte), 2)
+    Next
 End Function
 Public Function MD5(sMessage)
     m_lOnBits(0) = CLng(1)

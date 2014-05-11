@@ -258,7 +258,7 @@ Option Explicit
 'sckConnected 7 已连接
 'sckClosing 8 同级人员正在关闭连接
 'sckError 9 错误
-Dim IsStuInfo As Boolean
+
 
 Private Sub cmdConfig_Click()
     frmConfig.Show 1
@@ -291,7 +291,9 @@ Sub InitializationConfig()
     '初始化部分全局变量
     AppPath = IIf(Right(App.Path, 1) = "\", App.Path, App.Path & "\")
     ConfigPath = AppPath & "Config.ini"
-    IsStuInfo = False
+    IsBinaryTransfer = False
+    IsHeadPicture = False
+    IsExamFile = False
     '加载皮肤
     SkinFramework.LoadSkin App.Path & "\Styles\iTunes", "Normalitunes.ini"
     SkinFramework.ApplyWindow Me.hwnd
@@ -330,9 +332,35 @@ Private Sub sckClient_Connect()
 End Sub
 
 Private Sub sckClient_DataArrival(ByVal bytesTotal As Long)
-    Dim sData As String * 100
-    sckClient.GetData sData, vbString, 100
     
+    Dim sData As String * 100, i As Long
+    Dim byt() As Byte
+    If IsBinaryTransfer = False Then
+        sckClient.GetData sData, vbString, 100
+    Else                                                                        '分块接收
+        Open BinaryTransferFileName For Binary As #1
+        If BinaryFileLength <= LOF(1) + bytesTotal Then
+            IsBinaryTransfer = False
+            BinaryFileLength = 0
+            BinaryTransferFileName = ""
+            If IsHeadPicture = True Then                                        '如果传的头像
+                frmMain.imgHead.Stretch = True
+                frmMain.imgHead.Picture = LoadPicture(AppPath & "\temp\Head.jpg")
+                Kill AppPath & "\temp\Head.jpg"
+                IsHeadPicture = False
+            End If
+            If IsExamFile = True Then
+                Unload frmLoading
+                frmExam.Show 1
+                IsExamFile = False
+            End If
+        End If
+        ReDim byt(bytesTotal - 1)
+        sckClient.GetData byt
+        Put #1, LOF(1) + 1, byt
+        Close #1
+        
+    End If
     'MsgBox Hex(StrPtr(sData))
     If Left(sData, 27) = "YTEMSCommand:Login Success!" Then
         frmLoading.Show
@@ -342,20 +370,61 @@ Private Sub sckClient_DataArrival(ByVal bytesTotal As Long)
         sckClient.GetData StuInfo.DeptNo, vbString, 10
         sckClient.GetData StuInfo.S_JoinYear, vbString, 4
         sckClient.GetData StuInfo.StuName, vbString, 10
-        'sckClient.GetData StuInfo.StuPw, vbString, 32
+        sckClient.GetData StuInfo.StuPw, vbString, 32
         sckClient.GetData StuInfo.StuSex, vbString, 10
         sckClient.GetData StuInfo.UID, vbString, 10
         cmdLogin.Enabled = True
         cmdConfig.Enabled = True
         Me.Hide
         frmMain.Show
-        frmMain.txtUserName = StuInfo.StuName
-        frmMain.txtClassNo = StuInfo.ClassNo
-        frmMain.txtJoinYear = StuInfo.S_JoinYear
-        frmMain.txtSex = StuInfo.StuSex
-        frmMain.txtUID = StuInfo.UID
+        frmMain.txtUserName = RemoveMask(StuInfo.StuName)
+        frmMain.txtClassNo = RemoveMask(StuInfo.ClassNo)
+        frmMain.txtJoinYear = RemoveMask(StuInfo.S_JoinYear)
+        frmMain.txtSex = RemoveMask(StuInfo.StuSex)
+        frmMain.txtUID = RemoveMask(StuInfo.UID)
+        '------------获取考试信息------------
+        Dim ExaminfoLength As Long
+        Dim Examinfo() As ExamInformation
+        sckClient.GetData ExaminfoLength, vbLong, 4
+        If ExaminfoLength > 0 Then
+            ReDim Examinfo(ExaminfoLength / 70 - 1)                             '70代表Len(Examinformation)
+            For i = 0 To UBound(Examinfo)
+                sckClient.GetData Examinfo(i).ExamDataTime, , 30
+                sckClient.GetData Examinfo(i).ExamID, , 10
+                sckClient.GetData Examinfo(i).ExamName, , 20
+                sckClient.GetData Examinfo(i).ExamTime, , 10
+                frmMain.lstExamInformation.ListItems.Add , , RemoveMask(Examinfo(i).ExamName)
+                frmMain.lstExamInformation.ListItems(frmMain.lstExamInformation.ListItems.Count).SubItems(1) = RemoveMask(Examinfo(i).ExamID)
+                frmMain.lstExamInformation.ListItems(frmMain.lstExamInformation.ListItems.Count).SubItems(2) = Examinfo(i).ExamDataTime
+                frmMain.lstExamInformation.ListItems(frmMain.lstExamInformation.ListItems.Count).SubItems(3) = RemoveMask(Examinfo(i).ExamTime)
+            Next
+        End If
         '----------接受图片
-        SocketReceiveHeadPic frmMain.imgHead, sckClient
+        'SocketReceiveHeadPic frmMain.imgHead, sckClient
+        BinaryTransferFileName = AppPath & "temp\Head.jpg"
+        sckClient.GetData BinaryFileLength, , 4
+        If Dir(BinaryTransferFileName) <> "" Then Kill BinaryTransferFileName
+        Open BinaryTransferFileName For Binary As #1
+        If ExaminfoLength > 0 Then
+            ReDim byt(bytesTotal - 104 - 1 - 86 - 70 - 4)
+        Else
+            ReDim byt(bytesTotal - 104 - 1 - 86 - 4)
+        End If
+        sckClient.GetData byt
+        Put #1, , byt
+        Close #1
+        IsHeadPicture = True
+        IsBinaryTransfer = True
+        If BinaryFileLength <= UBound(byt) + 1 Then
+            IsBinaryTransfer = False
+            IsHeadPicture = False
+            BinaryFileLength = 0
+            BinaryTransferFileName = ""
+            frmMain.imgHead.Stretch = True
+            frmMain.imgHead.Picture = LoadPicture(AppPath & "temp\Head.jpg")
+            Kill AppPath & "\temp\Head.jpg"
+        End If
+        
         '------------------------
         Unload frmLoading
     ElseIf Left(sData, 59) = "YTEMSCommand:Login Failed!Error:Username Or Password Wrong!" Then
@@ -370,11 +439,38 @@ Private Sub sckClient_DataArrival(ByVal bytesTotal As Long)
         sckClient.GetData StuMoreInfo.ClassName, vbString, 10
         sckClient.GetData StuMoreInfo.Dept, vbString, 10
         sckClient.GetData StuMoreInfo.DeptDtor, vbString, 10
-        frmMoreInfo.txtClassName = StuMoreInfo.ClassName
-        frmMoreInfo.txtClassDtor = StuMoreInfo.ClassDtor
-        frmMoreInfo.txtDept = StuMoreInfo.Dept
-        frmMoreInfo.txtDeptDtor = StuMoreInfo.DeptDtor
+        frmMoreInfo.txtClassName = RemoveMask(StuMoreInfo.ClassName)
+        frmMoreInfo.txtClassDtor = RemoveMask(StuMoreInfo.ClassDtor)
+        frmMoreInfo.txtDept = RemoveMask(StuMoreInfo.Dept)
+        frmMoreInfo.txtDeptDtor = RemoveMask(StuMoreInfo.DeptDtor)
         Unload frmLoading
+    ElseIf Left(sData, 32) = "YTEMSCommand:SetPasswordSuccess!" Then
+        StuInfo.StuPw = NewPassword
+        MsgBox "密码修改成功", vbInformation
+    ElseIf Left(sData, 31) = "YTEMSCommand:SetPasswordFailed!" Then
+        MsgBox "密码修改失败", vbCritical
+    ElseIf Left(sData, 51) = "YTEMSCommand:Can Not Enter Exam!Date & Time Invalid" Then
+        MsgBox "不在考试时间内，无法进入考试。" & vbCrLf & "请在考试时间内进入考试！", vbCritical
+        Unload frmLoading
+    ElseIf Left(sData, 29) = "YTEMSCommand:AllowToEnterExam" Then
+        BinaryTransferFileName = AppPath & "\temp\Exam.bin"
+        sckClient.GetData BinaryFileLength, , 4
+        If Dir(BinaryTransferFileName) <> "" Then Kill BinaryTransferFileName
+        Open BinaryTransferFileName For Binary As #1
+        ReDim byt(bytesTotal - 104 - 1)
+        sckClient.GetData byt
+        Put #1, , byt
+        Close #1
+        IsBinaryTransfer = True
+        IsExamFile = True
+        If BinaryFileLength <= UBound(byt) + 1 Then
+            IsBinaryTransfer = False
+            IsExamFile = False
+            BinaryFileLength = 0
+            BinaryTransferFileName = ""
+        End If
+        'ElseIf IsBinaryTransfer = True Then                                         '分块接收
+        
     End If
 End Sub
 

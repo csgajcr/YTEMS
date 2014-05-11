@@ -73,8 +73,6 @@ Sub InitiazationConfig()
     sckListen.Listen
     '连接数据库
     ConnectMySQL
-    
-    
 End Sub
 Sub ConnectMySQL()
     On Error GoTo myerr
@@ -86,7 +84,7 @@ Sub ConnectMySQL()
     & " DATABASE=" & SQLInfo.DBName & ";" _
     & "UID=" & SQLInfo.UID & ";PWD=" & SQLInfo.Password & "; OPTION=3"
     mysql_conn.Open
-    mysql_rs.CursorLocation = adUseClient
+    'mysql_rs.CursorLocation = adUseClient
     'mysql_rs.Open "SELECT * FROM mytesttable ", mysql_conn
     'mysql_rs.MoveFirst
     'Do While Not mysql_rs.EOF
@@ -99,7 +97,9 @@ myerr:
     End
 End Sub
 
+
 Private Sub Form_Initialize()
+    
     
     If App.PrevInstance = True Then
         MsgBox "服务端已运行，请勿重复运行", vbInformation
@@ -116,7 +116,9 @@ Private Sub Form_Load()
     'tmp.UID = "root"
     'tmp.Password = "670510"
     'SaveSQLConnectionInfo ConfigPath, tmp
-    
+    'Dim a() As ExamInformation
+    'SQLQueryExamInformation "tb_exammanage", "tb_examminfo", "02111301", a
+    'MsgBox a(2).ExamDataTime
 End Sub
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
@@ -125,7 +127,10 @@ Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
     For i = 0 To sckServer.UBound
         sckServer(i).Close
     Next
+    End
 End Sub
+
+
 
 
 
@@ -154,7 +159,7 @@ Private Sub sckServer_Close(Index As Integer)
     
     Dim i As Long
     For i = 0 To lstUser.ListCount - 1
-        If lstUser.List(i) = sckServer(Index).RemoteHostIP Then
+        If Left(lstUser.List(i), Len(sckServer(Index).RemoteHostIP)) = sckServer(Index).RemoteHostIP Then
             lstUser.RemoveItem i
         End If
     Next
@@ -177,13 +182,27 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
                 sckServer(Index).SendData StuInfo.DeptNo
                 sckServer(Index).SendData StuInfo.S_JoinYear
                 SocketSendWideChar StuInfo.StuName, 10, sckServer(Index)
-                'sckServer(Index).SendData StuInfo.StuPw
+                sckServer(Index).SendData StuInfo.StuPw
                 SocketSendWideChar StuInfo.StuSex, 10, sckServer(Index)
                 sckServer(Index).SendData StuInfo.UID
-                
+                '-----------发送考试信息
+                Dim Examinfo() As ExamInformation
+                If SQLQueryExamInformation("tb_exammanage", "tb_examminfo", StuInfo.ClassNo, Examinfo) Then
+                    SocketSendExamInformation Examinfo, sckServer(Index)
+                Else
+                    Dim ExamInfoLength As Long
+                    ExamInfoLength = 0
+                    sckServer(Index).SendData ExamInfoLength
+                End If
                 '--------发送图片
-                SocketSendHeadPic AppPath & "UserPicture\Head.jpg", sckServer(Index)
-                lstUser.AddItem sckServer(Index).RemoteHostIP
+                If Dir(AppPath & "UserPicture\" & RemoveMask(StuInfo.UID) & ".jpg") <> "" Then
+                    SocketSendBinaryFile AppPath & "UserPicture\" & RemoveMask(StuInfo.UID) & ".jpg", sckServer(Index)
+                Else
+                    SocketSendBinaryFile AppPath & "UserPicture\" & "Default.jpg", sckServer(Index)
+                End If
+                
+                '-------------------------
+                lstUser.AddItem sckServer(Index).RemoteHostIP & " | " & StuInfo.UID
             Else
                 sckServer(Index).SendData "YTEMSCommand:Login Failed!Error:Username Or Password Wrong!"
                 
@@ -204,5 +223,28 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
             SocketSendWideChar StuMoreInfo.Dept, 10, sckServer(Index)
             SocketSendWideChar StuMoreInfo.DeptDtor, 10, sckServer(Index)
         End If
+    ElseIf Left(sData, 34) = "YTEMSClientCommand:ChangePassword:" Then
+        sTmp = Split(Mid(sData, 35, Len(sData) - 34), "|")
+        If SQLSetStudentPassword("tb_student", sTmp(0), sTmp(1)) Then
+            sTmp2 = "YTEMSCommand:SetPasswordSuccess!"
+            sckServer(Index).SendData sTmp2
+        Else
+            sTmp2 = "YTEMSCommand:SetPasswordFailed!"
+            sckServer(Index).SendData sTmp2
+        End If
+    ElseIf Left(sData, 29) = "YTEMSClientCommand:EnterExam:" Then
+        sTmp = Split(Mid(sData, 30, Len(sData) - 29), "|")
+        Dim ExamDate As Date, TimeLength As Long
+        ExamDate = sTmp(1)
+        TimeLength = CLng(sTmp(2))
+        If Now >= ExamDate And Now <= DateAdd("n", TimeLength, ExamDate) Then
+            sTmp2 = "YTEMSCommand:AllowToEnterExam"
+            sckServer(Index).SendData sTmp2
+            SocketSendBinaryFile AppPath & "Examination Paper\" & RemoveMask(sTmp(0)) & ".bin", sckServer(Index)
+        Else
+            sTmp2 = "YTEMSCommand:Can Not Enter Exam!Date & Time Invalid"
+            sckServer(Index).SendData sTmp2
+        End If
+        
     End If
 End Sub

@@ -11,7 +11,7 @@ Begin VB.Form frmMain
    MaxButton       =   0   'False
    ScaleHeight     =   8400
    ScaleWidth      =   5145
-   StartUpPosition =   3  '窗口缺省
+   StartUpPosition =   2  '屏幕中心
    Begin VB.Frame FraUserInformation 
       Caption         =   "个人信息"
       BeginProperty Font 
@@ -28,6 +28,14 @@ Begin VB.Form frmMain
       TabIndex        =   0
       Top             =   120
       Width           =   4935
+      Begin VB.CommandButton Command1 
+         Caption         =   "修改登录密码"
+         Height          =   255
+         Left            =   240
+         TabIndex        =   14
+         Top             =   2280
+         Width           =   1575
+      End
       Begin VB.CommandButton cmdMoreInfo 
          Caption         =   "查看详细信息"
          Height          =   255
@@ -61,6 +69,7 @@ Begin VB.Form frmMain
             _ExtentX        =   7011
             _ExtentY        =   5741
             View            =   3
+            LabelEdit       =   1
             LabelWrap       =   -1  'True
             HideSelection   =   -1  'True
             FullRowSelect   =   -1  'True
@@ -69,21 +78,34 @@ Begin VB.Form frmMain
             ForeColor       =   -2147483640
             BackColor       =   -2147483643
             Appearance      =   1
-            NumItems        =   2
+            NumItems        =   4
             BeginProperty ColumnHeader(1) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
-               Text            =   "考试科目"
-               Object.Width           =   2540
+               Text            =   "科目"
+               Object.Width           =   2469
             EndProperty
             BeginProperty ColumnHeader(2) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
                SubItemIndex    =   1
-               Object.Width           =   2540
+               Text            =   "考试号"
+               Object.Width           =   1764
+            EndProperty
+            BeginProperty ColumnHeader(3) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+               SubItemIndex    =   2
+               Text            =   "时间"
+               Object.Width           =   3528
+            EndProperty
+            BeginProperty ColumnHeader(4) {BDD1F052-858B-11D1-B16A-00C0F0283628} 
+               SubItemIndex    =   3
+               Text            =   "时长(分)"
+               Object.Width           =   1411
             EndProperty
          End
-         Begin VB.Image Image1 
-            Height          =   1335
-            Left            =   2760
-            Top             =   3840
-            Width           =   1455
+         Begin VB.Image cmdEnterExam 
+            Height          =   1575
+            Left            =   2400
+            Picture         =   "frmMain.frx":0000
+            Stretch         =   -1  'True
+            Top             =   3720
+            Width           =   1815
          End
       End
       Begin VB.TextBox txtJoinYear 
@@ -285,11 +307,48 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Private Sub cmdEnterExam_Click()
+    Dim sCommand As String * 100
+    Dim msg As Long
+    If lstExamInformation.SelectedItem.Index = -1 Then
+        MsgBox "请选择要进入的考试", vbCritical
+        Exit Sub
+    End If
+    msg = MsgBox("即将进入" & lstExamInformation.SelectedItem.Text & "科目的考试，确认进入？", vbYesNo + vbInformation)
+    If msg = vbYes Then
+        
+        sCommand = "YTEMSClientCommand:EnterExam:" & lstExamInformation.SelectedItem.SubItems(1) & "|" & lstExamInformation.SelectedItem.SubItems(2) & "|" & lstExamInformation.SelectedItem.SubItems(3)
+        frmLogin.sckClient.SendData sCommand
+        Unload frmLoading
+    Else
+        Exit Sub
+    End If
+    
+End Sub
+
+Private Sub cmdEnterExam_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
+    If Button = 1 Then
+        
+        
+    End If
+End Sub
+
+Private Sub cmdEnterExam_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
+    If Button = 1 Then
+
+    End If
+End Sub
+
 Private Sub cmdMoreInfo_Click()
     frmMoreInfo.Show 1
 End Sub
 
-Private Sub Form_Initialize()
+Private Sub Command1_Click()
+    frmSetPassword.Show 1
+End Sub
+
+Private Sub Form_Load()
+    
     txtUserName.BackColor = &HB6B6B6
     txtSex.BackColor = &HB6B6B6
     txtUID.BackColor = &HB6B6B6
@@ -303,4 +362,6 @@ Private Sub Form_Unload(Cancel As Integer)
         End
     End If
 End Sub
+
+
 

@@ -42,6 +42,11 @@ Attribute VB_Exposed = False
 Option Explicit
 Private Declare Function SetWindowPos& Lib "user32" (ByVal hwnd As Long, ByVal hWndInsertAfter As Long, ByVal X As Long, ByVal Y As Long, ByVal cx As Long, ByVal cy As Long, ByVal wFlags As Long)
 
+
+Private Sub Form_Load()
+    SetWindowPos Me.hwnd, -1, 0, 0, 0, 0, 3
+End Sub
+
 Private Sub Timer1_Timer()
     Select Case Label1.Caption
     Case "Loading"
@@ -57,5 +62,5 @@ Private Sub Timer1_Timer()
     Case "Loading....."
         Label1.Caption = "Loading"
     End Select
-    SetWindowPos Me.hwnd, -1, 0, 0, 0, 0, 3
+    
 End Sub

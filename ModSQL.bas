@@ -24,10 +24,32 @@ myerr:
     MsgBox Err.Number & Err.Description
     SQLQueryStudentInfo = False
 End Function
+Public Function SQLQueryTeacherInfo(TableName As String, UID As String, TcInfo As TeacherInformation) As Boolean
+    'On Error GoTo myerr
+    'WaitForMysqlConnection
+    Dim mysql_rs As New ADODB.Recordset
+    mysql_rs.CursorLocation = adUseClient
+    '--------
+    mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
+    mysql_rs.Open "SELECT * FROM " & TableName & " WHERE TeaNo = " & UID, mysql_conn
+    
+    TcInfo.DeptNo = mysql_rs(4)
+    TcInfo.JoinYear = mysql_rs(5)
+    TcInfo.Password = mysql_rs(3)
+    TcInfo.TeacherName = mysql_rs(1)
+    TcInfo.TeacherSex = mysql_rs(2)
+    TcInfo.UID = mysql_rs(0)
+    mysql_rs.Close
+    SQLQueryTeacherInfo = True
+    Exit Function
+myerr:
+    MsgBox Err.Number & Err.Description
+    SQLQueryTeacherInfo = False
+End Function
 Public Function SQLQueryStudentMoreInfo(ClassTableName As String, DeptTableName As String, ClassNo As String, DeptNo As String, StuMoreInfo As StudentMoreInfo) As Boolean
     'On Error GoTo myerr
     'WaitForMysqlConnection
-        Dim mysql_rs As New ADODB.Recordset
+    Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '-------------
     mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic

@@ -34,6 +34,14 @@ Public Type ExamInformation
     ExamDataTime As String * 30
     ExamTime As String * 10
 End Type
+Public Type TeacherInformation
+    UID As String * 10
+    TeacherName As String * 10
+    TeacherSex As String * 10
+    Password As String * 32
+    DeptNo As String * 10
+    JoinYear As String * 4
+End Type
 Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 Public Function LoadServerIP(sConfigPath As String) As String
     LoadServerIP = ReadFromINI("YTEMS Common Config", "ServerIP", sConfigPath)

@@ -4,7 +4,7 @@ Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "MSWINSCK.OCX"
 Begin VB.Form frmLogin 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "移通考试系统 登陆"
-   ClientHeight    =   2835
+   ClientHeight    =   3315
    ClientLeft      =   45
    ClientTop       =   330
    ClientWidth     =   4605
@@ -19,9 +19,26 @@ Begin VB.Form frmLogin
    EndProperty
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
-   ScaleHeight     =   2835
+   ScaleHeight     =   3315
    ScaleWidth      =   4605
    StartUpPosition =   2  '屏幕中心
+   Begin VB.OptionButton optTeacher 
+      Caption         =   "我是老师"
+      Height          =   300
+      Left            =   3000
+      TabIndex        =   12
+      Top             =   1920
+      Width           =   1215
+   End
+   Begin VB.OptionButton optStudent 
+      Caption         =   "我是学生"
+      Height          =   300
+      Left            =   120
+      TabIndex        =   11
+      Top             =   1920
+      Value           =   -1  'True
+      Width           =   1215
+   End
    Begin MSWinsockLib.Winsock sckClient 
       Left            =   5160
       Top             =   2640
@@ -43,7 +60,7 @@ Begin VB.Form frmLogin
       Height          =   375
       Left            =   1720
       TabIndex        =   8
-      Top             =   1920
+      Top             =   2400
       Width           =   1095
    End
    Begin VB.CommandButton cmdExit 
@@ -60,7 +77,7 @@ Begin VB.Form frmLogin
       Height          =   375
       Left            =   3360
       TabIndex        =   7
-      Top             =   1920
+      Top             =   2400
       Width           =   1095
    End
    Begin VB.CommandButton cmdLogin 
@@ -78,7 +95,7 @@ Begin VB.Form frmLogin
       Height          =   375
       Left            =   120
       TabIndex        =   6
-      Top             =   1920
+      Top             =   2400
       Width           =   1095
    End
    Begin VB.TextBox txtPassword 
@@ -124,10 +141,10 @@ Begin VB.Form frmLogin
       _StockProps     =   0
    End
    Begin VB.Line Line1 
-      X1              =   80
-      X2              =   4560
-      Y1              =   2400
-      Y2              =   2400
+      X1              =   75
+      X2              =   4555
+      Y1              =   2880
+      Y2              =   2880
    End
    Begin VB.Label lblVersion 
       AutoSize        =   -1  'True
@@ -143,7 +160,7 @@ Begin VB.Form frmLogin
       Height          =   255
       Left            =   4200
       TabIndex        =   10
-      Top             =   2520
+      Top             =   3000
       Width           =   180
    End
    Begin VB.Label Label4 
@@ -161,7 +178,7 @@ Begin VB.Form frmLogin
       Height          =   255
       Left            =   3240
       TabIndex        =   9
-      Top             =   2520
+      Top             =   3000
       Width           =   900
    End
    Begin VB.Image imgLogo 
@@ -220,7 +237,7 @@ Begin VB.Form frmLogin
       Height          =   255
       Left            =   1080
       TabIndex        =   1
-      Top             =   2520
+      Top             =   3000
       Width           =   60
    End
    Begin VB.Label label1 
@@ -238,7 +255,7 @@ Begin VB.Form frmLogin
       Height          =   255
       Left            =   120
       TabIndex        =   0
-      Top             =   2520
+      Top             =   3000
       Width           =   900
    End
 End
@@ -328,13 +345,18 @@ End Sub
 
 Private Sub sckClient_Connect()
     lblStatus.Caption = "连接成功....正在等待验证..."
-    sckClient.SendData "YTEMSClientCommand-Login:" & txtUserName.Text & "|" & MD5(txtPassword.Text)
+    If optStudent.Value Then
+        sckClient.SendData "YTEMSClientCommand-Login:" & txtUserName.Text & "|" & MD5(txtPassword.Text)
+    Else
+        sckClient.SendData "YTEMSClientCommand-TeacherLogin:" & txtUserName.Text & "|" & MD5(txtPassword.Text)
+    End If
 End Sub
 
 Private Sub sckClient_DataArrival(ByVal bytesTotal As Long)
     
     Dim sData As String * 100, i As Long
     Dim byt() As Byte
+    '------------------判断数据类型-----------------
     If IsBinaryTransfer = False Then
         sckClient.GetData sData, vbString, 100
     Else                                                                        '分块接收
@@ -349,7 +371,7 @@ Private Sub sckClient_DataArrival(ByVal bytesTotal As Long)
                 Kill AppPath & "\temp\Head.jpg"
                 IsHeadPicture = False
             End If
-            If IsExamFile = True Then
+            If IsExamFile = True Then                                           '如果传的考试文件
                 Unload frmLoading
                 frmExam.Show 1
                 IsExamFile = False

@@ -365,3 +365,6 @@ End Sub
 
 
 
+Private Sub FraUserInformation_DragDrop(Source As Control, X As Single, Y As Single)
+
+End Sub

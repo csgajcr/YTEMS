@@ -4,16 +4,24 @@ Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramewor
 Begin VB.Form frmMain 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "移通考试系统 服务端"
-   ClientHeight    =   4890
+   ClientHeight    =   5595
    ClientLeft      =   45
    ClientTop       =   330
    ClientWidth     =   8085
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   4890
+   ScaleHeight     =   5595
    ScaleWidth      =   8085
    StartUpPosition =   3  '窗口缺省
+   Begin VB.CommandButton cmdConfig 
+      Caption         =   "服务器设置"
+      Height          =   615
+      Left            =   6720
+      TabIndex        =   2
+      Top             =   120
+      Width           =   1215
+   End
    Begin VB.ListBox lstUser 
       Height          =   3120
       Left            =   120
@@ -97,6 +105,10 @@ myerr:
     End
 End Sub
 
+
+Private Sub cmdConfig_Click()
+    frmConfig.Show 1
+End Sub
 
 Private Sub Form_Initialize()
     

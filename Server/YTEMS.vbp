@@ -1,6 +1,6 @@
 Type=Exe
-Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\..\Windows\SysWOW64\stdole2.tlb#OLE Automation
-Reference=*\G{B691E011-1797-432E-907A-4D8C69339129}#6.0#0#..\..\..\..\..\Program Files (x86)\Common Files\System\ado\msado15.dll#Microsoft ActiveX Data Objects 6.0 Library
+Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\..\..\Windows\SysWOW64\stdole2.tlb#OLE Automation
+Reference=*\G{B691E011-1797-432E-907A-4D8C69339129}#6.0#0#..\..\..\..\..\..\Program Files (x86)\Common Files\System\ado\msado15.dll#Microsoft ActiveX Data Objects 6.0 Library
 Object={248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0; MSWINSCK.OCX
 Object={BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0; Codejock.SkinFramework.v12.0.1.ocx
 Form=frmMain.frm
@@ -9,6 +9,7 @@ Module=ModCommon; ModCommon.bas
 Module=ModMD5; ..\ModMD5.bas
 Module=ModEncodeLib; ..\ModEncodeLib.bas
 Module=ModSQL; ..\ModSQL.bas
+Form=frmConfig.frm
 IconForm="frmMain"
 Startup="frmMain"
 ExeName32="YTEMSServer.exe"

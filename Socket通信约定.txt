@@ -7,7 +7,8 @@
 Socket通信约定：
 4byte Per Packet
 
-0001 - 请求登陆 C->S 格式 [Usrname]|[Password]
-0002 - 登陆成功 S->C 
-0003 - 登录失败
-0004 - 学生信息
+0001 - 学生请求登陆 C->S 格式 [Usrname]|[Password]
+0002 - 教师请求登陆 C->S 格式 [Usrname]|[Password]
+0003 - 登陆成功 S->C 
+0004 - 登录失败 S->C
+0005 - 学生信息

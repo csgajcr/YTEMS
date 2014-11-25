@@ -71,7 +71,7 @@ End Function
 Public Function SQLSetStudentPassword(TableName As String, UID As String, newPassword As String) As Boolean
     'On Error GoTo myerr
     'WaitForMysqlConnection
-        Dim mysql_rs As New ADODB.Recordset
+    Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '--------------------------
     mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
@@ -86,7 +86,7 @@ End Function
 Public Function SQLQueryExamInformation(ManageTableName As String, InfoTableName As String, ClassNo As String, Examinfo() As ExamInformation) As Boolean
     'On Error GoTo myerr
     'WaitForMysqlConnection
-        Dim mysql_rs As New ADODB.Recordset
+    Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '--------------------------
     mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic

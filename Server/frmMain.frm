@@ -1,6 +1,6 @@
 VERSION 5.00
-Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "MSWINSCK.OCX"
-Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.v12.0.1.ocx"
+Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "mswinsck.ocx"
+Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.Unicode.v12.0.1.ocx"
 Begin VB.Form frmMain 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "移通考试系统 服务端"
@@ -179,112 +179,36 @@ Private Sub sckServer_Close(Index As Integer)
 End Sub
 
 Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
-    Dim RetData() As Byte, sData As String * 100, sTmp() As String
+    Dim Cmd As Byte
+    Dim sTmp() As String
+    Dim sData As String * 100
     Dim StuInfo As StudentInformation
-    Dim TcInfo As TeacherInformation
-    Dim sTmp2 As String * 100
-    sckServer(Index).GetData sData, vbString
-    '------------------用户请求登陆----------------------------
-    If Left(sData, 25) = "YTEMSClientCommand-Login:" Then
-        sTmp = Split(Mid(sData, 26, Len(sData) - 25), "|")
+    sckServer(Index).GetData Cmd, , 1
+    Select Case Cmd
+    Case CS_MSG_STU_REQUEST_LOGIN
+        sckServer(Index).GetData sData, , bytesTotal - 1
+        sTmp = Split(sData, "|")                                                'sTmp数组为用户名和密码
         If SQLQueryStudentInfo("tb_student", sTmp(0), StuInfo) Then
             If Left(sTmp(1), 24) = Left(StuInfo.StuPw, 24) Then
+                '登陆成功
+                sckServer(Index).SendData SC_MSG_LOGIN_SUCCESS
                 
-                sTmp2 = "YTEMSCommand:Login Success!"
-                sckServer(Index).SendData sTmp2
-                sckServer(Index).SendData StuInfo.ClassNo
-                sckServer(Index).SendData StuInfo.DeptNo
-                sckServer(Index).SendData StuInfo.S_JoinYear
-                SocketSendWideChar StuInfo.StuName, 10, sckServer(Index)
-                sckServer(Index).SendData StuInfo.StuPw
-                SocketSendWideChar StuInfo.StuSex, 10, sckServer(Index)
-                sckServer(Index).SendData StuInfo.UID
-                '-----------发送考试信息
-                Dim Examinfo() As ExamInformation
-                If SQLQueryExamInformation("tb_exammanage", "tb_examminfo", StuInfo.ClassNo, Examinfo) Then
-                    SocketSendExamInformation Examinfo, sckServer(Index)
-                Else
-                    Dim ExamInfoLength As Long
-                    ExamInfoLength = 0
-                    sckServer(Index).SendData ExamInfoLength
-                End If
-                '--------发送图片
-                If Dir(AppPath & "UserPicture\" & RemoveMask(StuInfo.UID) & ".jpg") <> "" Then
-                    SocketSendBinaryFile AppPath & "UserPicture\" & RemoveMask(StuInfo.UID) & ".jpg", sckServer(Index)
-                Else
-                    SocketSendBinaryFile AppPath & "UserPicture\" & "Default.jpg", sckServer(Index)
-                End If
-                
-                '-------------------------
-                lstUser.AddItem sckServer(Index).RemoteHostIP & " | " & StuInfo.UID
             Else
-                sckServer(Index).SendData "YTEMSCommand:Login Failed!Error:Username Or Password Wrong!"
-                
+                '登录失败
+                sckServer(Index).SendData SC_MSG_LOGIN_FAILED
             End If
         Else
-            sckServer(Index).SendData "YTEMSCommand:Login Failed!Error:Username Or Password Wrong!"
+            '登录失败
+            sckServer(Index).SendData SC_MSG_LOGIN_FAILED
             
         End If
-        '------------------教师请求登陆----------------------------
-    ElseIf Left(sData, 32) = "YTEMSClientCommand-TeacherLogin:" Then
-        sTmp = Split(Mid(sData, 33, Len(sData) - 32), "|")
-        If SQLQueryTeacherInfo("tb_teacher", sTmp(0), TcInfo) Then
-            If Left(sTmp(1), 24) = Left(TcInfo.Password, 24) Then
-                sTmp2 = "YTEMSCommand:Login Success!"
-                sckServer(Index).SendData sTmp2
-                sckServer(Index).SendData TcInfo.DeptNo
-                sckServer(Index).SendData TcInfo.JoinYear
-                sckServer(Index).SendData TcInfo.Password
-                SocketSendWideChar TcInfo.TeacherName, 10, sckServer(Index)
-                SocketSendWideChar TcInfo.TeacherSex, 10, sckServer(Index)
-                sckServer(Index).SendData TcInfo.UID
-                '-----------发送考试信息
-                
-                '--------发送图片
-                
-            End If
-            
-        Else
-            sckServer(Index).SendData "YTEMSCommand:Login Failed!Error:Username Or Password Wrong!"
-        End If
         
-        '------------------用户请求获取更多学生信息----------------------------
-    ElseIf Left(sData, 38) = "YTEMSClientCommand:GetMoreInformation:" Then
-        Dim ClassNo As String * 10, DeptNo As String * 10
-        sTmp = Split(Mid(sData, 39, Len(sData) - 38), "|")
-        Dim StuMoreInfo As StudentMoreInfo
-        If SQLQueryStudentMoreInfo("tb_class", "tb_Dept", sTmp(0), sTmp(1), StuMoreInfo) Then
-            sTmp2 = "YTEMSCommand:StudentMoreInfo"
-            sckServer(Index).SendData sTmp2
-            SocketSendWideChar StuMoreInfo.ClassDtor, 10, sckServer(Index)
-            SocketSendWideChar StuMoreInfo.ClassName, 10, sckServer(Index)
-            SocketSendWideChar StuMoreInfo.Dept, 10, sckServer(Index)
-            SocketSendWideChar StuMoreInfo.DeptDtor, 10, sckServer(Index)
-        End If
-        '------------------用户请求获取修改密码----------------------------
-    ElseIf Left(sData, 34) = "YTEMSClientCommand:ChangePassword:" Then
-        sTmp = Split(Mid(sData, 35, Len(sData) - 34), "|")
-        If SQLSetStudentPassword("tb_student", sTmp(0), sTmp(1)) Then
-            sTmp2 = "YTEMSCommand:SetPasswordSuccess!"
-            sckServer(Index).SendData sTmp2
-        Else
-            sTmp2 = "YTEMSCommand:SetPasswordFailed!"
-            sckServer(Index).SendData sTmp2
-        End If
-        '------------------用户请求进入考试----------------------------
-    ElseIf Left(sData, 29) = "YTEMSClientCommand:EnterExam:" Then
-        sTmp = Split(Mid(sData, 30, Len(sData) - 29), "|")
-        Dim ExamDate As Date, TimeLength As Long
-        ExamDate = sTmp(1)
-        TimeLength = CLng(sTmp(2))
-        If Now >= ExamDate And Now <= DateAdd("n", TimeLength, ExamDate) Then
-            sTmp2 = "YTEMSCommand:AllowToEnterExam"
-            sckServer(Index).SendData sTmp2
-            SocketSendBinaryFile AppPath & "Examination Paper\" & RemoveMask(sTmp(0)) & ".bin", sckServer(Index)
-        Else
-            sTmp2 = "YTEMSCommand:Can Not Enter Exam!Date & Time Invalid"
-            sckServer(Index).SendData sTmp2
-        End If
         
-    End If
+        
+    Case 2
+        
+    End Select
+    
+    
+    
 End Sub

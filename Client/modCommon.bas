@@ -14,26 +14,27 @@ Public YTEMSServerPort As Long
 Public YTEMSConnnection As Boolean
 Public StuInfo As StudentInformation
 Public NewPassword As String
+'--------
 Public Type ExamInformation
-    ExamName As String * 20
-    ExamID As String * 10
-    ExamDataTime As String * 30
-    ExamTime As String * 10
+    ExamName As String
+    ExamID As String
+    ExamDataTime As String
+    ExamTime As String
 End Type
 Public Type StudentInformation
-    UID As String * 10
-    StuName As String * 10
-    StuSex As String * 10
-    StuPw As String * 32
-    DeptNo As String * 10
-    ClassNo As String * 10
-    S_JoinYear As String * 4
+    UID As String
+    StuName As String
+    StuSex As String
+    StuPw As String
+    DeptNo As String
+    ClassNo As String
+    S_JoinYear As String
 End Type
 Public Type StudentMoreInfo
-    ClassName As String * 10
-    ClassDtor As String * 10
-    Dept As String * 10
-    DeptDtor As String * 10
+    ClassName As String
+    ClassDtor As String
+    Dept As String
+    DeptDtor As String
 End Type
 Public Function LoadServerIP(sConfigPath As String) As String
     LoadServerIP = ReadFromINI("YTEMS Common Config", "ServerIP", sConfigPath)

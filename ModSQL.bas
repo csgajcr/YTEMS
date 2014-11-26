@@ -52,6 +52,7 @@ Public Function SQLQueryStudentMoreInfo(ClassTableName As String, DeptTableName 
     Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '-------------
+    
     mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
     mysql_rs.Open "SELECT * FROM " & ClassTableName & " WHERE ClassNo = " & ClassNo, mysql_conn
     StuMoreInfo.ClassDtor = mysql_rs(3)
@@ -71,7 +72,7 @@ End Function
 Public Function SQLSetStudentPassword(TableName As String, UID As String, newPassword As String) As Boolean
     'On Error GoTo myerr
     'WaitForMysqlConnection
-        Dim mysql_rs As New ADODB.Recordset
+    Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '--------------------------
     mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
@@ -83,10 +84,10 @@ myerr:
     MsgBox Err.Number & Err.Description
     SQLSetStudentPassword = False
 End Function
-Public Function SQLQueryExamInformation(ManageTableName As String, InfoTableName As String, ClassNo As String, Examinfo() As ExamInformation) As Boolean
+Public Function SQLQueryExamInformation(ManageTableName As String, InfoTableName As String, ClassNo As String, ExamInfo() As ExamInformation) As Boolean
     'On Error GoTo myerr
     'WaitForMysqlConnection
-        Dim mysql_rs As New ADODB.Recordset
+    Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '--------------------------
     mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
@@ -94,17 +95,17 @@ Public Function SQLQueryExamInformation(ManageTableName As String, InfoTableName
     Dim i As Long
     If mysql_rs.RecordCount > 0 Then
         For i = 1 To mysql_rs.RecordCount
-            ReDim Preserve Examinfo(i - 1)
-            Examinfo(i - 1).ExamID = mysql_rs(0)
-            Examinfo(i - 1).ExamTime = mysql_rs(2)
-            Examinfo(i - 1).ExamName = mysql_rs(1)
+            ReDim Preserve ExamInfo(i - 1)
+            ExamInfo(i - 1).ExamID = mysql_rs(0)
+            ExamInfo(i - 1).ExamTime = mysql_rs(2)
+            ExamInfo(i - 1).ExamName = mysql_rs(1)
             mysql_rs.MoveNext
         Next
         mysql_rs.Close
-        For i = 0 To UBound(Examinfo)
+        For i = 0 To UBound(ExamInfo)
             mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
-            mysql_rs.Open "SELECT * FROM " & InfoTableName & " WHERE SubjectNo = " & AddQueto(Examinfo(i).ExamID), mysql_conn
-            Examinfo(i).ExamDataTime = mysql_rs(1)
+            mysql_rs.Open "SELECT * FROM " & InfoTableName & " WHERE SubjectNo = " & AddQueto(ExamInfo(i).ExamID), mysql_conn
+            ExamInfo(i).ExamDataTime = mysql_rs(1)
             mysql_rs.Close
         Next
     Else
@@ -117,4 +118,21 @@ Public Function SQLQueryExamInformation(ManageTableName As String, InfoTableName
 myerr:
     MsgBox Err.Number & Err.Description
     SQLQueryExamInformation = False
+End Function
+
+Public Function SQLQueryStudentScore(ScoreTableName As String, StuNo As String, SubjectNo As String, ret_StuScore As Long) As Boolean
+    'On Error GoTo myerr
+    'WaitForMysqlConnection
+    Dim mysql_rs As New ADODB.Recordset
+    mysql_rs.CursorLocation = adUseClient
+    '--------------------------
+    mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
+    mysql_rs.Open "SELECT * FROM " & ScoreTableName & " WHERE SubjectNo = " & AddQueto(SubjectNo) & " AND " & "StuNo = " & AddQueto(StuNo), mysql_conn
+    ret_StuScore = mysql_rs(3)
+    mysql_rs.Close
+    SQLQueryStudentScore = True
+    Exit Function
+myerr:
+    MsgBox Err.Number & Err.Description
+    SQLQueryStudentScore = False
 End Function

@@ -5,12 +5,12 @@ Begin VB.Form frmMoreInfo
    ClientHeight    =   2520
    ClientLeft      =   45
    ClientTop       =   330
-   ClientWidth     =   3240
+   ClientWidth     =   3180
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
    ScaleHeight     =   2520
-   ScaleWidth      =   3240
+   ScaleWidth      =   3180
    StartUpPosition =   2  '屏幕中心
    Begin VB.Frame Frame1 
       Caption         =   "更多信息"
@@ -191,13 +191,19 @@ Private Sub Form_Load()
     txtDept.BackColor = &HB6B6B6
     txtDeptDtor.BackColor = &HB6B6B6
     frmLoading.Show
-    Dim sCommand As String * 100
-    sCommand = "YTEMSClientCommand:GetMoreInformation:" & StuInfo.ClassNo & "|" & StuInfo.DeptNo
-    frmLogin.sckClient.SendData sCommand
+    
+    'sCommand = "YTEMSClientCommand:GetMoreInformation:" & StuInfo.ClassNo & "|" & StuInfo.DeptNo
+    'frmLogin.sckClient.SendData sCommand
+    frmLogin.sckClient.SendData CS_MSG_REQUEST_STUDENT_MORE_INFORMATION
+    frmLogin.sckClient.SendData StuInfo.ClassNo & "|" & StuInfo.DeptNo
     
     
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
     Unload Me
+End Sub
+
+Private Sub Frame1_DragDrop(Source As Control, X As Single, Y As Single)
+
 End Sub

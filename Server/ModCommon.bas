@@ -14,25 +14,25 @@ Public Type SQLConnectionInfo
     Password As String
 End Type
 Public Type StudentInformation
-    UID As String * 10
-    StuName As String * 10
-    StuSex As String * 10
-    StuPw As String * 32
-    DeptNo As String * 10
-    ClassNo As String * 10
-    S_JoinYear As String * 4
+    UID As String
+    StuName As String
+    StuSex As String
+    StuPw As String
+    DeptNo As String
+    ClassNo As String
+    S_JoinYear As String
 End Type
 Public Type StudentMoreInfo
-    ClassName As String * 10
-    ClassDtor As String * 10
-    Dept As String * 10
-    DeptDtor As String * 10
+    ClassName As String
+    ClassDtor As String
+    Dept As String
+    DeptDtor As String
 End Type
 Public Type ExamInformation
-    ExamName As String * 20
-    ExamID As String * 10
-    ExamDataTime As String * 30
-    ExamTime As String * 10
+    ExamName As String
+    ExamID As String
+    ExamDataTime As String
+    ExamTime As String
 End Type
 Public Type TeacherInformation
     UID As String * 10
@@ -131,15 +131,16 @@ Public Function SocketSendHeadPic(ByVal PicPath As String, sck As Winsock)
     Loop
     Close #FileNum
 End Function
-Public Function SocketSendExamInformation(Examinfo() As ExamInformation, sck As Winsock)
-    Dim ExamInfoLength As Long, i As Integer
-    ExamInfoLength = (UBound(Examinfo) + 1) * Len(Examinfo(0))
-    sck.SendData ExamInfoLength
-    For i = 0 To UBound(Examinfo)
-        sck.SendData Examinfo(i).ExamDataTime
-        sck.SendData Examinfo(i).ExamID
-        SocketSendWideChar Examinfo(i).ExamName, 20, sck
-        sck.SendData Examinfo(i).ExamTime
+Public Function SocketSendExamInformation(ExamInfo() As ExamInformation, sck As Winsock)
+    Dim ExamInfoCount As Long, i As Integer
+    ExamInfoCount = (UBound(ExamInfo) + 1)
+    sck.SendData CStr(ExamInfoCount)
+    For i = 0 To UBound(ExamInfo)
+        sck.SendData "|" & ExamInfo(i).ExamDataTime & "|"
+        sck.SendData ExamInfo(i).ExamID & "|"
+        'SocketSendWideChar ExamInfo(i).ExamName, 20, sck
+        sck.SendData ExamInfo(i).ExamName & "|"
+        sck.SendData ExamInfo(i).ExamTime
     Next
 End Function
 Public Function WaitForMysqlConnection()

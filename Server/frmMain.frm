@@ -1,6 +1,6 @@
 VERSION 5.00
-Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "MSWINSCK.OCX"
-Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.v12.0.1.ocx"
+Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "mswinsck.ocx"
+Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.Unicode.v12.0.1.ocx"
 Begin VB.Form frmMain 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "移通考试系统 服务端"
@@ -181,10 +181,15 @@ End Sub
 Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
     Dim Cmd As Byte
     Dim sTmp() As String
+<<<<<<< HEAD
     Dim sData As String
     Dim StuInfo As StudentInformation
     Dim ExamInfo() As ExamInformation
     sData = ""
+=======
+    Dim sData As String * 100
+    Dim StuInfo As StudentInformation
+>>>>>>> origin/master
     sckServer(Index).GetData Cmd, , 1
     Select Case Cmd
     Case CS_MSG_STU_REQUEST_LOGIN
@@ -192,6 +197,7 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
         sTmp = Split(sData, "|")                                                'sTmp数组为用户名和密码
         If SQLQueryStudentInfo("tb_student", sTmp(0), StuInfo) Then
             If Left(sTmp(1), 24) = Left(StuInfo.StuPw, 24) Then
+<<<<<<< HEAD
                 '登陆成功,发送学生基本信息
                 sckServer(Index).SendData SC_MSG_LOGIN_SUCCESS
                 sckServer(Index).SendData StuInfo.ClassNo & "|"
@@ -210,6 +216,10 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
                     sckServer(Index).SendData ExamInfoCount
                 End If
                 '-----------------------------------------------------------
+=======
+                '登陆成功
+                sckServer(Index).SendData SC_MSG_LOGIN_SUCCESS
+>>>>>>> origin/master
                 
             Else
                 '登录失败
@@ -223,6 +233,7 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
         
         
         
+<<<<<<< HEAD
     Case CS_MSG_REQUEST_STUDENT_MORE_INFORMATION
         sckServer(Index).GetData sData, , bytesTotal - 1
         sTmp = Split(sData, "|")
@@ -235,6 +246,10 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
             sckServer(Index).SendData StuMoreInfo.Dept & "|"
             sckServer(Index).SendData StuMoreInfo.DeptDtor
         End If
+=======
+    Case 2
+        
+>>>>>>> origin/master
     End Select
     
     

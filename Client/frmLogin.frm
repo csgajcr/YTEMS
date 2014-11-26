@@ -1,6 +1,6 @@
 VERSION 5.00
-Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.v12.0.1.ocx"
-Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "MSWINSCK.OCX"
+Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.Unicode.v12.0.1.ocx"
+Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "mswinsck.ocx"
 Begin VB.Form frmLogin 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "移通考试系统 登陆"
@@ -355,15 +355,20 @@ Private Sub sckClient_Connect()
 End Sub
 
 Private Sub sckClient_DataArrival(ByVal bytesTotal As Long)
+<<<<<<< HEAD
     Dim Cmd As Byte, sTmp() As String
     Dim sData As String
     'Dim StuInfo As StudentInformation
     Dim i As Integer
     Dim ExamInfo() As ExamInformation
+=======
+    Dim Cmd As Byte
+>>>>>>> origin/master
     sckClient.GetData Cmd, , 1
     '1字节指令Cmd
     Select Case Cmd
     Case SC_MSG_LOGIN_SUCCESS
+<<<<<<< HEAD
         frmLoading.Show
         '---------------------------登陆成功接收学生基本信息------------------------------
         sckClient.GetData sData, , bytesTotal - 1
@@ -422,6 +427,15 @@ Private Sub sckClient_DataArrival(ByVal bytesTotal As Long)
         frmMoreInfo.txtDept = RemoveMask(StuMoreInfo.Dept)
         frmMoreInfo.txtDeptDtor = RemoveMask(StuMoreInfo.DeptDtor)
         Unload frmLoading
+=======
+        
+        
+        
+    Case SC_MSG_LOGIN_FAILED
+        
+        
+        
+>>>>>>> origin/master
     End Select
     
     

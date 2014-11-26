@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 frmMain = 227, 68, 1106, 635, , 644, 120, 1244, 623, C
 modIni = 22, 22, 1109, 545, C
 ModCommon = 174, 135, 1245, 630, C
@@ -6,3 +7,13 @@ ModEncodeLib = 66, 66, 1153, 589, C
 ModSQL = 100, 63, 1177, 641, C
 frmConfig = 139, 150, 1472, 769, C, 666, 99, 1133, 718, C
 ModCommunication = 0, 0, 1079, 511, C
+=======
+frmMain = 205, 84, 1084, 651, , 371, 129, 1095, 637, C
+modIni = 22, 22, 1109, 545, C
+ModCommon = 41, 136, 1112, 638, 
+ModMD5 = 198, 198, 1269, 700, C
+ModEncodeLib = 66, 66, 1153, 589, C
+ModSQL = 83, 23, 1170, 578, C
+frmConfig = 139, 150, 1472, 769, C, 666, 100, 1133, 718, C
+ModCommunication = 154, 154, 1084, 677, 
+>>>>>>> origin/master

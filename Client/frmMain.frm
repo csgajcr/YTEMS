@@ -1,8 +1,8 @@
 VERSION 5.00
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.ocx"
 Begin VB.Form frmMain 
    BorderStyle     =   1  'Fixed Single
-   Caption         =   "移通考试系统 客户端"
+   Caption         =   "双体考试系统 客户端"
    ClientHeight    =   8400
    ClientLeft      =   45
    ClientTop       =   330
@@ -60,6 +60,14 @@ Begin VB.Form frmMain
          TabIndex        =   11
          Top             =   2520
          Width           =   4455
+         Begin VB.CommandButton cmdQueryScore 
+            Caption         =   "查询分数"
+            Height          =   375
+            Left            =   240
+            TabIndex        =   15
+            Top             =   3840
+            Width           =   1215
+         End
          Begin MSComctlLib.ListView lstExamInformation 
             Height          =   3255
             Left            =   240
@@ -317,8 +325,9 @@ Private Sub cmdEnterExam_Click()
     msg = MsgBox("即将进入" & lstExamInformation.SelectedItem.Text & "科目的考试，确认进入？", vbYesNo + vbInformation)
     If msg = vbYes Then
         
-        sCommand = "YTEMSClientCommand:EnterExam:" & lstExamInformation.SelectedItem.SubItems(1) & "|" & lstExamInformation.SelectedItem.SubItems(2) & "|" & lstExamInformation.SelectedItem.SubItems(3)
-        frmLogin.sckClient.SendData sCommand
+        'sCommand = "YTEMSClientCommand:EnterExam:" & lstExamInformation.SelectedItem.SubItems(1) & "|" & lstExamInformation.SelectedItem.SubItems(2) & "|" & lstExamInformation.SelectedItem.SubItems(3)
+        frmLogin.sckClient.SendData CS_MSG_REQUEST_ENTER_EXAM
+        frmLogin.sckClient.SendData lstExamInformation.SelectedItem.SubItems(1) & "|" & lstExamInformation.SelectedItem.SubItems(2) & "|" & lstExamInformation.SelectedItem.SubItems(3)
         Unload frmLoading
     Else
         Exit Sub
@@ -335,7 +344,7 @@ End Sub
 
 Private Sub cmdEnterExam_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
     If Button = 1 Then
-
+        
     End If
 End Sub
 
@@ -365,6 +374,3 @@ End Sub
 
 
 
-Private Sub FraUserInformation_DragDrop(Source As Control, X As Single, Y As Single)
-
-End Sub

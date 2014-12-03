@@ -1,9 +1,9 @@
 VERSION 5.00
-Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.v12.0.1.ocx"
+Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.Unicode.v12.0.1.ocx"
 Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "MSWINSCK.OCX"
 Begin VB.Form frmLogin 
    BorderStyle     =   1  'Fixed Single
-   Caption         =   "移通考试系统 登陆"
+   Caption         =   "双体考试系统 登陆"
    ClientHeight    =   3315
    ClientLeft      =   45
    ClientTop       =   330
@@ -332,6 +332,7 @@ Private Sub Form_Unload(Cancel As Integer)
 End Sub
 
 Private Sub sckClient_Close()
+    On Error Resume Next
     sckClient.Close
     If frmLoading.Visible = True Then Unload frmLoading
     MsgBox "与服务器连接断开", vbInformation
@@ -341,6 +342,7 @@ Private Sub sckClient_Close()
     
     frmLogin.Show
     Unload frmMain
+    Unload frmAdmin
 End Sub
 
 Private Sub sckClient_Connect()
@@ -350,16 +352,23 @@ Private Sub sckClient_Connect()
         sckClient.SendData CS_MSG_STU_REQUEST_LOGIN
         sckClient.SendData txtUserName.Text & "|" & MD5(txtPassword.Text)
     Else
-        sckClient.SendData "YTEMSClientCommand-TeacherLogin:" & txtUserName.Text & "|" & MD5(txtPassword.Text)
+        'sckClient.SendData "YTEMSClientCommand-TeacherLogin:" & txtUserName.Text & "|" & MD5(txtPassword.Text)
+        sckClient.SendData CS_MSG_TEACHER_REQUEST_LOGIN
+        sckClient.SendData txtUserName.Text & "|" & MD5(txtPassword.Text)
     End If
 End Sub
 
 Private Sub sckClient_DataArrival(ByVal bytesTotal As Long)
     Dim Cmd As Byte, sTmp() As String
     Dim sData As String
+    Dim lTmp As Long
     'Dim StuInfo As StudentInformation
     Dim i As Integer
     Dim ExamInfo() As ExamInformation
+    Dim Filenum As Integer
+    Dim byt() As Byte
+Start:
+    Cmd = 0
     sckClient.GetData Cmd, , 1
     '1字节指令Cmd
     Select Case Cmd
@@ -398,7 +407,7 @@ Private Sub sckClient_DataArrival(ByVal bytesTotal As Long)
             frmMain.lstExamInformation.ListItems(frmMain.lstExamInformation.ListItems.Count).SubItems(2) = ExamInfo(i).ExamDataTime
             frmMain.lstExamInformation.ListItems(frmMain.lstExamInformation.ListItems.Count).SubItems(3) = RemoveMask(ExamInfo(i).ExamTime)
         Next
-        sckClient.SendData
+        
         
         Unload frmLoading
     Case SC_MSG_LOGIN_FAILED
@@ -422,6 +431,76 @@ Private Sub sckClient_DataArrival(ByVal bytesTotal As Long)
         frmMoreInfo.txtDept = RemoveMask(StuMoreInfo.Dept)
         frmMoreInfo.txtDeptDtor = RemoveMask(StuMoreInfo.DeptDtor)
         Unload frmLoading
+    Case SC_MSG_FILE_TRANSFER
+        '需要传文件
+        sckClient.GetData lTmp, , 4
+        BinaryFileLength = lTmp
+        sckClient.GetData lTmp, 4
+        sckClient.GetData sData, , lTmp
+        BinaryTransferFileName = sData
+        If Dir(AppPath & "temp\" & BinaryTransferFileName) <> "" Then
+            Kill AppPath & "temp\" & BinaryTransferFileName
+        End If
+        Select Case sData
+            
+        End Select
+        CurrentLength = 0
+        sData = ""
+        lTmp = 0
+        GoTo Start
+    Case SC_MSG_FILE_DATA
+        '文件内容
+        Filenum = FreeFile
+        Open AppPath & "temp\" & BinaryTransferFileName For Binary As #Filenum
+        sckClient.GetData lTmp, , 4
+        CurrentLength = CurrentLength + lTmp
+        ReDim Preserve byt(lTmp - 1)
+        sckClient.GetData byt, , lTmp
+        Put #Filenum, LOF(Filenum) + 1, byt
+        Close #Filenum
+        If CurrentLength < BinaryFileLength Then                                ' 判断文件是否传输完成
+            GoTo Start
+        End If
+    Case SC_MSG_SET_PASSWORD_SUCCESS
+        StuInfo.StuPw = NewPassword
+        MsgBox "密码修改成功", vbInformation
+    Case SC_MSG_SET_PASSWORD_FAILED
+        MsgBox "密码修改失败", vbCritical
+    Case SC_MSG_ALLOW_ENTER_EXAM                                                '进入考试
+        MsgBox "允许进入考试", vbInformation
+        
+        '--------------------------
+    Case SC_MSG_NOT_ALLOW_ENTER_EXAM
+        MsgBox "目前不允许进入考试", vbCritical
+    Case SC_MSG_TEACHER_LOGIN_SUCCESS
+        cmdLogin.Enabled = True
+        cmdConfig.Enabled = True
+        '--------------------------------------------接受教师相关信息-------------------
+        sckClient.GetData sData, , bytesTotal - 1
+        sTmp() = Split(sData, "|")
+        TcInfo.DeptNo = sTmp(0)
+        TcInfo.JoinYear = sTmp(1)
+        TcInfo.Password = sTmp(2)
+        TcInfo.TeacherName = sTmp(3)
+        TcInfo.TeacherSex = sTmp(4)
+        TcInfo.UID = sTmp(5)
+        frmAdmin.Show
+        Me.Hide
+        frmAdmin.txtJoinYear.Text = TcInfo.JoinYear
+        frmAdmin.txtUserName.Text = TcInfo.TeacherName
+        frmAdmin.txtUID.Text = TcInfo.UID
+    Case SC_MSG_TEACHER_LOGIN_FAILED
+        '登录失败
+        MsgBox "用户名或密码错误", vbCritical
+        lblStatus.Caption = "用户名或密码错误"
+        cmdLogin.Enabled = True
+        cmdConfig.Enabled = True
+        Exit Sub
+    Case SC_MSG_TEACHER_SET_PASSWORD_SUCCESS
+        TcInfo.Password = NewPassword
+        MsgBox "密码修改成功", vbInformation
+    Case SC_MSG_TEACHER_SET_PASSWORD_FAILED
+        MsgBox "密码修改失败", vbCritical
     End Select
     
     

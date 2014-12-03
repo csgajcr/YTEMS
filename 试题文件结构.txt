@@ -1,5 +1,6 @@
 试题分为3个部分：选择题、填空题、解答题
 试题以ini文件为原本的形式存储，后经MPQCTL压缩并AES加密后发送
+INI和DOC文件打包 拓展名为bin
 
 试题ini文件结构：
 [Examinfo] ;这个section用于存储试题的基本信息
@@ -7,18 +8,13 @@ Subject =
 SubjectNo = 
 DateTime = 
 ExamTime = 
-;题目数量：
-Choice = 
-FillBlank = 
-Answer = 
-ChioceScore = 
-FillBlank = 
-;选择区section
+[Test]
+Choice = 5 ;选择题数量
+FillBlank = 5 ;填空题数量
+Answer = 2 ;解答题数量
+ChioceScore = 5;
+FillBlankScore = 5;
+AnswerScore = 10;
 [Choice]
-;题在题库中的ID
-001 = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
-Choice001 = xxxxxxxxxxxxxxxxxx ;这两行是题目和选项
-[FillBlank]
-002 = xxxxxxxxxxxxxxxxxxx
-[Answer]
-003 = 题目文本文件|题目所带图片|题目所占分数
+Choice1 = [总答案个数]|[单选/多选]|答案
+Choice2 = [总答案个数]|[单选/多选]|答案

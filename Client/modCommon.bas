@@ -1,11 +1,13 @@
 Attribute VB_Name = "modCommon"
 Option Explicit
 'YTEMS全局变量
-Public IsBinaryTransfer As Boolean
-Public BinaryTransferFileName As String
-Public BinaryFileLength As Long
+Public IsBinaryTransfer As Boolean                                              '是否为传输状态
+Public BinaryTransferFileName As String                                         '文件路径
+Public BinaryFileLength As Long                                                 '文件长度
 Public IsHeadPicture As Boolean
-Public IsExamFile As Boolean
+Public IsExamFile As Boolean                                                    '考试文件
+Public CurrentLength As Long
+Public ChoiceCfg() As ChoiceConfig
 '-------
 Public AppPath As String
 Public ConfigPath As String
@@ -13,8 +15,17 @@ Public YTEMSServerIP As String
 Public YTEMSServerPort As Long
 Public YTEMSConnnection As Boolean
 Public StuInfo As StudentInformation
+Public TcInfo As TeacherInformation
 Public NewPassword As String
 '--------
+Public Type TeacherInformation
+    UID As String
+    TeacherName As String
+    TeacherSex As String
+    Password As String
+    DeptNo As String
+    JoinYear As String
+End Type
 Public Type ExamInformation
     ExamName As String
     ExamID As String
@@ -65,24 +76,24 @@ End Function
 Public Function SocketReceiveHeadPic(img As Image, sck As Winsock)
     'On Error GoTo myerr
     Dim byt() As Byte
-    Dim FileNum As Integer, FileLength As Long, i As Long
+    Dim Filenum As Integer, FileLength As Long, i As Long
     Dim c As Long
     c = 0
-    FileNum = FreeFile
+    Filenum = FreeFile
     sck.GetData FileLength, vbLong, 4
-    Open AppPath & "temp\Head.jpg" For Binary As #FileNum
+    Open AppPath & "temp\Head.jpg" For Binary As #Filenum
     Do
         sck.GetData byt, , 1024
         If FileLength - c < 1024 Then
             For i = 0 To FileLength - c - 1
-                Put #FileNum, , byt(i)
+                Put #Filenum, , byt(i)
             Next
             Exit Do
         End If
         c = c + 1024
-        Put #FileNum, , byt
+        Put #Filenum, , byt
     Loop
-    Close FileNum
+    Close Filenum
     img.Stretch = True
     img.Picture = LoadPicture(AppPath & "temp\Head.jpg")
     Kill (AppPath & "temp\Head.jpg")
@@ -93,24 +104,24 @@ End Function
 Public Function SocketReceiveBinaryFile(FilePath As String, sck As Winsock)
     'On Error GoTo myerr
     Dim byt() As Byte
-    Dim FileNum As Integer, FileLength As Long, i As Long
+    Dim Filenum As Integer, FileLength As Long, i As Long
     Dim c As Long
     c = 0
-    FileNum = FreeFile
+    Filenum = FreeFile
     sck.GetData FileLength, vbLong, 4
-    Open FilePath For Binary As #FileNum
+    Open FilePath For Binary As #Filenum
     Do
         sck.GetData byt, , 1024
         If FileLength - c < 1024 Then
             For i = 0 To FileLength - c - 1
-                Put #FileNum, , byt(i)
+                Put #Filenum, , byt(i)
             Next
             Exit Do
         End If
         c = c + 1024
-        Put #FileNum, , byt
+        Put #Filenum, , byt
     Loop
-    Close FileNum
+    Close Filenum
     Exit Function
 myerr:
     MsgBox Err.Number & Err.Description
@@ -125,4 +136,15 @@ Public Function RemoveMask(str As String) As String
         sTmp = str
         RemoveMask = sTmp
     End If
+End Function
+Public Function GetPathFromFileName(FileName As String) As String
+    Dim sTmp As String
+    Dim i As Integer
+    For i = Len(FileName) To 1 Step -1
+        If Mid(FileName, i, 1) = "\" Then
+            sTmp = Left(FileName, i)
+            GetPathFromFileName = sTmp
+            Exit Function
+        End If
+    Next
 End Function

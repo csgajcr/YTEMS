@@ -1,0 +1,16 @@
+解答题指向txt与答题卡文件ini打包 拓展名为asr
+[Examinfo] ;这个section用于存储试题的基本信息
+Subject = 
+SubjectNo = 
+DateTime = 
+ExamTime = 
+[Choice]
+Choice1 = [选择项]
+Choice2 = [选择项]
+;...
+[FillBlank]
+FillBlank1 = [填空项]
+;....
+[Answer]
+Answer1 = Answer1.txt
+;...

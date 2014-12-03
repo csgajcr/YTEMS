@@ -13,3 +13,15 @@ Socket通信约定：
 0004 - 登录失败 S->C
 0005 - 请求更多学生信息 C->S 格式 [ClassNo]|[DeptNo]
 0006 - 回送更多学生信息 S->C
+0008 - 传输文件信息 C->S 格式 [FileLength][FileName Length][FileName]
+0009 - 传输文件信息 S->C 格式 [FileLength][FileName Length][FileName]
+000A - 传输文件 C->S 格式 [Length][Data]
+000B - 传输文件 S->C 格式 [Length][Data]
+000C - 设置密码 C->S 格式 [UID]|[Password]
+000D - 设置密码成功 S->C
+000E - 设置密码失败 S->C
+000F - 请求进入考试 C->S 格式[ExamID][ExamDate][ExamTime]
+0010 - 允许进入 S->C 
+0011 - 不允许进入 S->C 
+0012 - 教师登陆成功 S->C
+0013 - 教师登录失败 S->C

@@ -1,0 +1,25 @@
+[Examinfo] ;这个section用于存储试题的基本信息
+Subject = 
+SubjectNo = 
+DateTime = 
+ExamTime = 
+[Choice] ;123代表题目
+1=
+2=
+3=
+[FillBlank] ;123代表题目
+1=
+2=
+3=
+[Answer]
+1=
+2=
+3=
+4=
+
+
+
+
+
+
+

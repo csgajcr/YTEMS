@@ -1,8 +1,8 @@
 Attribute VB_Name = "ModSQL"
 Option Explicit
 Public Function SQLQueryStudentInfo(TableName As String, UID As String, StuInfo As StudentInformation) As Boolean
-    'On Error GoTo myerr
-    'WaitForMysqlConnection
+    On Error GoTo myerr
+    WaitForMysqlConnection
     Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '--------
@@ -21,12 +21,12 @@ Public Function SQLQueryStudentInfo(TableName As String, UID As String, StuInfo 
     SQLQueryStudentInfo = True
     Exit Function
 myerr:
-    MsgBox Err.Number & Err.Description
+    'MsgBox Err.Number & Err.Description
     SQLQueryStudentInfo = False
 End Function
 Public Function SQLQueryTeacherInfo(TableName As String, UID As String, TcInfo As TeacherInformation) As Boolean
-    'On Error GoTo myerr
-    'WaitForMysqlConnection
+    On Error GoTo myerr
+    WaitForMysqlConnection
     Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '--------
@@ -43,12 +43,12 @@ Public Function SQLQueryTeacherInfo(TableName As String, UID As String, TcInfo A
     SQLQueryTeacherInfo = True
     Exit Function
 myerr:
-    MsgBox Err.Number & Err.Description
+    'MsgBox Err.Number & Err.Description
     SQLQueryTeacherInfo = False
 End Function
 Public Function SQLQueryStudentMoreInfo(ClassTableName As String, DeptTableName As String, ClassNo As String, DeptNo As String, StuMoreInfo As StudentMoreInfo) As Boolean
-    'On Error GoTo myerr
-    'WaitForMysqlConnection
+    On Error GoTo myerr
+    WaitForMysqlConnection
     Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '-------------
@@ -66,12 +66,12 @@ Public Function SQLQueryStudentMoreInfo(ClassTableName As String, DeptTableName 
     SQLQueryStudentMoreInfo = True
     Exit Function
 myerr:
-    MsgBox Err.Number & Err.Description
+    'MsgBox Err.Number & Err.Description
     SQLQueryStudentMoreInfo = False
 End Function
 Public Function SQLSetStudentPassword(TableName As String, UID As String, newPassword As String) As Boolean
-    'On Error GoTo myerr
-    'WaitForMysqlConnection
+    On Error GoTo myerr
+    WaitForMysqlConnection
     Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '--------------------------
@@ -81,12 +81,12 @@ Public Function SQLSetStudentPassword(TableName As String, UID As String, newPas
     SQLSetStudentPassword = True
     Exit Function
 myerr:
-    MsgBox Err.Number & Err.Description
+    'MsgBox Err.Number & Err.Description
     SQLSetStudentPassword = False
 End Function
 Public Function SQLQueryExamInformation(ManageTableName As String, InfoTableName As String, ClassNo As String, ExamInfo() As ExamInformation) As Boolean
-    'On Error GoTo myerr
-    'WaitForMysqlConnection
+    On Error GoTo myerr
+    WaitForMysqlConnection
     Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '--------------------------
@@ -116,13 +116,13 @@ Public Function SQLQueryExamInformation(ManageTableName As String, InfoTableName
     SQLQueryExamInformation = True
     Exit Function
 myerr:
-    MsgBox Err.Number & Err.Description
+    'MsgBox Err.Number & Err.Description
     SQLQueryExamInformation = False
 End Function
 
 Public Function SQLQueryStudentScore(ScoreTableName As String, StuNo As String, SubjectNo As String, ret_StuScore As Long) As Boolean
-    'On Error GoTo myerr
-    'WaitForMysqlConnection
+    On Error GoTo myerr
+    WaitForMysqlConnection
     Dim mysql_rs As New ADODB.Recordset
     mysql_rs.CursorLocation = adUseClient
     '--------------------------
@@ -133,6 +133,21 @@ Public Function SQLQueryStudentScore(ScoreTableName As String, StuNo As String, 
     SQLQueryStudentScore = True
     Exit Function
 myerr:
-    MsgBox Err.Number & Err.Description
+    'MsgBox Err.Number & Err.Description
     SQLQueryStudentScore = False
+End Function
+Public Function SQLSetTeacherPassword(TableName As String, UID As String, newPassword As String) As Boolean
+    On Error GoTo myerr
+    WaitForMysqlConnection
+    Dim mysql_rs As New ADODB.Recordset
+    mysql_rs.CursorLocation = adUseClient
+    '--------------------------
+    mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
+    mysql_rs.Open "UPDATE " & TableName & " SET TeaPw=" & AddQueto(newPassword) & " WHERE TeaNo=" & UID, mysql_conn
+    
+    SQLSetTeacherPassword = True
+    Exit Function
+myerr:
+    'MsgBox Err.Number & Err.Description
+    SQLSetTeacherPassword = False
 End Function

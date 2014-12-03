@@ -1,9 +1,9 @@
 VERSION 5.00
 Object = "{248DD890-BB45-11CF-9ABC-0080C7E7B78D}#1.0#0"; "MSWINSCK.OCX"
-Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.v12.0.1.ocx"
+Object = "{BD0C1912-66C3-49CC-8B12-7B347BF6C846}#12.0#0"; "Codejock.SkinFramework.Unicode.v12.0.1.ocx"
 Begin VB.Form frmMain 
    BorderStyle     =   1  'Fixed Single
-   Caption         =   "移通考试系统 服务端"
+   Caption         =   "双体考试系统 服务端"
    ClientHeight    =   5595
    ClientLeft      =   45
    ClientTop       =   330
@@ -110,9 +110,16 @@ Private Sub cmdConfig_Click()
     frmConfig.Show 1
 End Sub
 
+Private Sub Command1_Click()
+    
+End Sub
+
+Private Sub cmdTest_Click()
+    
+    SocketSendBinaryFile "C:\Users\Jcr\Desktop\bd_logo1.png", sckServer(0)
+End Sub
+
 Private Sub Form_Initialize()
-    
-    
     If App.PrevInstance = True Then
         MsgBox "服务端已运行，请勿重复运行", vbInformation
         End
@@ -184,7 +191,11 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
     Dim sData As String
     Dim StuInfo As StudentInformation
     Dim ExamInfo() As ExamInformation
+    Dim ExamDate As Date
+    Dim TimeLength As Long
+    Dim TcInfo As TeacherInformation
     sData = ""
+    Cmd = 0
     sckServer(Index).GetData Cmd, , 1
     Select Case Cmd
     Case CS_MSG_STU_REQUEST_LOGIN
@@ -234,6 +245,65 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
             sckServer(Index).SendData StuMoreInfo.ClassName & "|"
             sckServer(Index).SendData StuMoreInfo.Dept & "|"
             sckServer(Index).SendData StuMoreInfo.DeptDtor
+        End If
+        
+    Case CS_MSG_FILE_TRANSFER
+        
+        
+        
+    Case CS_MSG_SET_PASSWORD
+        sckServer(Index).GetData sData, , bytesTotal - 1
+        sTmp = Split(sData, "|")
+        If SQLSetStudentPassword("tb_student", sTmp(0), sTmp(1)) Then
+            
+            sckServer(Index).SendData SC_MSG_SET_PASSWORD_SUCCESS               '密码修改成功
+        Else
+            
+            sckServer(Index).SendData SC_MSG_SET_PASSWORD_FAILED                '密码修改失败
+        End If
+    Case CS_MSG_REQUEST_ENTER_EXAM
+        '请求进入考试
+        sckServer(Index).GetData sData, , bytesTotal - 1
+        sTmp = Split(sData, "|")
+        ExamDate = sTmp(1)
+        TimeLength = CLng(sTmp(2))
+        If Now >= ExamDate And Now <= DateAdd("n", TimeLength, ExamDate) Then
+            
+            sckServer(Index).SendData SC_MSG_ALLOW_ENTER_EXAM                   '允许进入考试
+            'SocketSendBinaryFile AppPath & "Examination Paper\" & RemoveMask(sTmp(0)) & ".bin", sckServer(Index)
+        Else
+            
+            sckServer(Index).SendData SC_MSG_NOT_ALLOW_ENTER_EXAM               '不允许进入考试
+        End If
+    Case CS_MSG_TEACHER_REQUEST_LOGIN                                           '教师请求登录
+        sckServer(Index).GetData sData, , bytesTotal - 1
+        sTmp = Split(sData, "|")                                                'sTmp数组为用户名和密码
+        If SQLQueryTeacherInfo("tb_teacher", sTmp(0), TcInfo) Then
+            If Left(sTmp(1), 24) = Left(TcInfo.Password, 24) Then
+                sckServer(Index).SendData SC_MSG_TEACHER_LOGIN_SUCCESS
+                sckServer(Index).SendData TcInfo.DeptNo & "|"
+                sckServer(Index).SendData TcInfo.JoinYear & "|"
+                sckServer(Index).SendData TcInfo.Password & "|"
+                sckServer(Index).SendData TcInfo.TeacherName & "|"
+                sckServer(Index).SendData TcInfo.TeacherSex & "|"
+                sckServer(Index).SendData TcInfo.UID
+                
+            Else
+                sckServer(Index).SendData SC_MSG_TEACHER_LOGIN_FAILED
+            End If
+        Else
+            sckServer(Index).SendData SC_MSG_TEACHER_LOGIN_FAILED
+        End If
+    Case CS_MSG_TEACHER_SET_PASSWORD
+        sckServer(Index).GetData sData, , bytesTotal - 1
+        sTmp = Split(sData, "|")
+        If SQLSetTeacherPassword("tb_teacher", sTmp(0), sTmp(1)) Then
+            
+            sckServer(Index).SendData SC_MSG_TEACHER_SET_PASSWORD_SUCCESS       '密码修改成功
+        Else
+            
+            sckServer(Index).SendData SC_MSG_TEACHER_SET_PASSWORD_FAILED        '密码修改失败
+            
         End If
     End Select
     

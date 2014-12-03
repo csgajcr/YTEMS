@@ -190,7 +190,7 @@ Private Sub Form_Load()
     txtClassDtor.BackColor = &HB6B6B6
     txtDept.BackColor = &HB6B6B6
     txtDeptDtor.BackColor = &HB6B6B6
-    frmLoading.Show
+    'frmLoading.Show
     
     'sCommand = "YTEMSClientCommand:GetMoreInformation:" & StuInfo.ClassNo & "|" & StuInfo.DeptNo
     'frmLogin.sckClient.SendData sCommand
@@ -204,6 +204,3 @@ Private Sub Form_Unload(Cancel As Integer)
     Unload Me
 End Sub
 
-Private Sub Frame1_DragDrop(Source As Control, X As Single, Y As Single)
-
-End Sub

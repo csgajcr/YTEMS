@@ -6,7 +6,7 @@ Public ConfigPath As String
 Public YTEMSServerIP As String
 Public YTEMSServerPort As Long
 Public mysql_conn As New ADODB.Connection
-'Public mysql_rs As New ADODB.Recordset
+Public mysql_rs As New ADODB.Recordset
 Public Type SQLConnectionInfo
     IPAddress As String
     DBName As String
@@ -78,58 +78,71 @@ Public Function SocketSendWideChar(ByVal str As String, ByVal Length As Long, sc
     Next
 End Function
 Public Function SocketSendBinaryFile(FilePath As String, sck As Winsock)
-    Dim FileNum As Integer
+    Dim Filenum As Integer
     Dim byt() As Byte
     Dim FileLength As Long
     Dim ExtraLength As Long
     Dim i As Long
     Dim SendTimes As Long                                                       '发送次数
-    FileNum = FreeFile
-    Open FilePath For Binary As #FileNum
-    FileLength = LOF(FileNum)
-    sck.SendData FileLength
-    If FileLength <= 1000 Then
+    Dim FileName As String
+    Const StandardLength As Long = 1000
+    Filenum = FreeFile
+    Open FilePath For Binary As #Filenum
+    FileLength = LOF(Filenum)
+    FileName = GetFileNameFromPath(FilePath)
+    sck.SendData SC_MSG_FILE_TRANSFER                                           '发送指令
+    sck.SendData FileLength                                                     '发送文件大小
+    sck.SendData CLng(Len(FileName))                                            '发送文件名长度
+    sck.SendData FileName                                                       '发送文件名
+    '----------------
+    If FileLength <= StandardLength Then
         ReDim byt(FileLength - 1)
-        Get #FileNum, , byt
+        Get #Filenum, , byt
         sck.SendData byt
     Else
-        SendTimes = FileLength / 1000
-        ExtraLength = FileLength Mod 1000
+        SendTimes = FileLength / StandardLength
+        ExtraLength = FileLength Mod StandardLength
         For i = 1 To SendTimes
-            ReDim byt(999)
-            Get #FileNum, , byt
+            ReDim byt(StandardLength - 1)
+            Get #Filenum, , byt
+            sck.SendData SC_MSG_FILE_DATA
+            sck.SendData StandardLength
             sck.SendData byt
         Next
         If ExtraLength > 0 Then
             ReDim byt(ExtraLength - 1)
-            Get #FileNum, , byt
+            Get #Filenum, , byt
+            sck.SendData SC_MSG_FILE_DATA
+            sck.SendData ExtraLength
             sck.SendData byt
         End If
+        
     End If
+    '------------------
     
     
     
-    Close #FileNum
+    Close #Filenum
 End Function
 '---------------
 Public Function SocketSendHeadPic(ByVal PicPath As String, sck As Winsock)
-    Dim FileNum As Integer
+    Dim Filenum As Integer
     Dim byt() As Byte
     Dim FileLength As Long
-    FileNum = FreeFile
-    Open PicPath For Binary As #FileNum
-    FileLength = LOF(FileNum)
+    Filenum = FreeFile
+    Open PicPath For Binary As #Filenum
+    FileLength = LOF(Filenum)
     sck.SendData FileLength
     If FileLength < 1000 Then
         ReDim byt(FileLength - 1)
-        Get #FileNum, , byt
+        Get #Filenum, , byt
         sck.SendData byt
     End If
-    Do While Not EOF(FileNum)
-        Get #FileNum, , byt
+    Do While Not EOF(Filenum)
+        Get #Filenum, , byt
         sck.SendData byt
     Loop
-    Close #FileNum
+    Close #Filenum
 End Function
 Public Function SocketSendExamInformation(ExamInfo() As ExamInformation, sck As Winsock)
     Dim ExamInfoCount As Long, i As Integer
@@ -173,4 +186,28 @@ Public Function RemoveMask(str As String) As String
         sTmp = str
         RemoveMask = sTmp
     End If
+End Function
+
+Public Function GetFileNameFromPath(FilePath As String) As String
+    Dim sTmp As String
+    Dim sName As String
+    Dim i  As Integer
+    For i = Len(FilePath) To 1 Step -1
+        If Mid(FilePath, i, 1) = "\" Then
+            sName = Right(FilePath, Len(FilePath) - i)
+            Exit For
+        End If
+    Next
+    GetFileNameFromPath = sName
+End Function
+Public Function GetPathFromFileName(FileName As String) As String
+    Dim sTmp As String
+    Dim i As Integer
+    For i = Len(FileName) To 1 Step -1
+        If Mid(FileName, i, 1) = "\" Then
+            sTmp = Left(FileName, i)
+            GetPathFromFileName = sTmp
+            Exit Function
+        End If
+    Next
 End Function

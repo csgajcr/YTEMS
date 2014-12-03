@@ -168,10 +168,13 @@ Private Sub cmdSetPassword_Click()
         MsgBox "密码内含有非法字符", vbCritical
         Exit Sub
     End If
-    Dim sCommand As String * 100
-    sCommand = "YTEMSClientCommand:ChangePassword:" & StuInfo.UID & "|" & MD5(txtNew.Text)
-    frmLogin.sckClient.SendData sCommand
+    
+    'sCommand = "YTEMSClientCommand:ChangePassword:" & StuInfo.UID & "|" & MD5(txtNew.Text)
+    'frmLogin.sckClient.SendData sCommand
+    frmLogin.sckClient.SendData CS_MSG_SET_PASSWORD
+    frmLogin.sckClient.SendData StuInfo.UID & "|" & MD5(txtNew.Text)
     NewPassword = MD5(txtNew.Text)
     Unload Me
+    
 End Sub
 

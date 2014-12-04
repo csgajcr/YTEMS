@@ -25,6 +25,8 @@ End Function
 Public Function CompressTestFile(TestConfigFile As String, TestFile As String, DestFileName As String, mpqctl As MpqControl)
     mpqctl.AddFile DestFileName, TestConfigFile, "Config.ini", 1
     mpqctl.AddFile DestFileName, TestFile, "Exam.doc", 1
+    Kill TestConfigFile
+    'Kill TestFile
 End Function
 
 Public Function ReadTestConfigFile(ConfigPath As String, TestInfo As TestInformation, ChoiceCfg() As ChoiceConfig) As Boolean

@@ -110,9 +110,7 @@ Private Sub cmdConfig_Click()
     frmConfig.Show 1
 End Sub
 
-Private Sub Command1_Click()
-    
-End Sub
+
 
 Private Sub cmdTest_Click()
     
@@ -138,6 +136,14 @@ Private Sub Form_Load()
     'Dim a() As ExamInformation
     'SQLQueryExamInformation "tb_exammanage", "tb_examminfo", "02111301", a
     'MsgBox a(2).ExamDataTime
+    
+    Dim ef As ExamInformation
+    ef.ExamDataTime = "2012/12/12 12:12:12"
+    ef.ExamID = "007"
+    ef.ExamName = "1111aaaa"
+    ef.ExamTime = "120"
+    SQLDeleteExamInformation "tb_exammanage", "tb_examminfo", "005"
+    
 End Sub
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
@@ -194,6 +200,8 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
     Dim ExamDate As Date
     Dim TimeLength As Long
     Dim TcInfo As TeacherInformation
+    Dim ExamInfoCount As Long
+    Dim lTmp As Long
     sData = ""
     Cmd = 0
     sckServer(Index).GetData Cmd, , 1
@@ -216,7 +224,7 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
                 If SQLQueryExamInformation("tb_exammanage", "tb_examminfo", StuInfo.ClassNo, ExamInfo) Then
                     SocketSendExamInformation ExamInfo, sckServer(Index)
                 Else
-                    Dim ExamInfoCount As Long
+                    
                     ExamInfoCount = 0
                     sckServer(Index).SendData ExamInfoCount
                 End If
@@ -286,8 +294,14 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
                 sckServer(Index).SendData TcInfo.Password & "|"
                 sckServer(Index).SendData TcInfo.TeacherName & "|"
                 sckServer(Index).SendData TcInfo.TeacherSex & "|"
-                sckServer(Index).SendData TcInfo.UID
-                
+                sckServer(Index).SendData TcInfo.UID & "|"
+                '--------------发送学生考试信息
+                If SQLQueryExamInformation("tb_exammanage", "tb_examminfo", StuInfo.ClassNo, ExamInfo) Then
+                    SocketSendExamInformation ExamInfo, sckServer(Index)
+                Else
+                    ExamInfoCount = 0
+                    sckServer(Index).SendData ExamInfoCount
+                End If
             Else
                 sckServer(Index).SendData SC_MSG_TEACHER_LOGIN_FAILED
             End If
@@ -305,6 +319,17 @@ Private Sub sckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
             sckServer(Index).SendData SC_MSG_TEACHER_SET_PASSWORD_FAILED        '密码修改失败
             
         End If
+    Case CS_MSG_ADD_EXAM
+        sckServer(Index).GetData lTmp, , 4
+        sckServer(Index).GetData sData, , lTmp
+        sTmp = Split(sData, "|")
+        Dim ef As ExamInformation
+        ef.ExamID = sTmp(0)
+        ef.ExamName = sTmp(1)
+        ef.ExamDataTime = sTmp(2)
+        ef.ExamTime = sTmp(3)
+        
+        
     End Select
     
     

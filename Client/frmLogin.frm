@@ -489,6 +489,22 @@ Start:
         frmAdmin.txtJoinYear.Text = TcInfo.JoinYear
         frmAdmin.txtUserName.Text = TcInfo.TeacherName
         frmAdmin.txtUID.Text = TcInfo.UID
+        '---------------------------------接收相关考试信息-----------------------------
+        'sTmp(7)为考试信息个数
+        ReDim Preserve ExamInfo(CInt(sTmp(6)) - 1)
+        For i = 0 To CInt(sTmp(6)) - 1
+            ExamInfo(i).ExamDataTime = sTmp(6 + i * 4 + 1)
+            ExamInfo(i).ExamID = sTmp(6 + i * 4 + 2)
+            ExamInfo(i).ExamName = sTmp(6 + i * 4 + 3)
+            ExamInfo(i).ExamTime = sTmp(6 + i * 4 + 4)
+            frmAdmin.lstExamInformation.ListItems.Add , , RemoveMask(ExamInfo(i).ExamName)
+            frmAdmin.lstExamInformation.ListItems(frmAdmin.lstExamInformation.ListItems.Count).SubItems(1) = RemoveMask(ExamInfo(i).ExamID)
+            frmAdmin.lstExamInformation.ListItems(frmAdmin.lstExamInformation.ListItems.Count).SubItems(2) = ExamInfo(i).ExamDataTime
+            frmAdmin.lstExamInformation.ListItems(frmAdmin.lstExamInformation.ListItems.Count).SubItems(3) = RemoveMask(ExamInfo(i).ExamTime)
+        Next
+        
+        
+        
     Case SC_MSG_TEACHER_LOGIN_FAILED
         '登录失败
         MsgBox "用户名或密码错误", vbCritical

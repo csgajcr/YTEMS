@@ -1,4 +1,5 @@
 VERSION 5.00
+Object = "{DA729162-C84F-11D4-A9EA-00A0C9199875}#1.60#0"; "mpqctl.ocx"
 Object = "{86CF1D34-0C5F-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCT2.OCX"
 Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.ocx"
 Begin VB.Form frmAddExam 
@@ -30,11 +31,28 @@ Begin VB.Form frmAddExam
       TabIndex        =   13
       Top             =   1920
       Width           =   9015
+      Begin VB.CommandButton cmdCancel 
+         Caption         =   "取消"
+         BeginProperty Font 
+            Name            =   "微软雅黑"
+            Size            =   9
+            Charset         =   134
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   375
+         Left            =   7200
+         TabIndex        =   39
+         Top             =   3240
+         Width           =   1695
+      End
       Begin VB.TextBox txtChoiceCount 
          Height          =   375
          IMEMode         =   3  'DISABLE
          Left            =   1560
-         TabIndex        =   27
+         TabIndex        =   26
          Top             =   360
          Width           =   735
       End
@@ -42,7 +60,7 @@ Begin VB.Form frmAddExam
          Caption         =   "确定"
          Height          =   375
          Left            =   2520
-         TabIndex        =   26
+         TabIndex        =   25
          Top             =   360
          Width           =   735
       End
@@ -57,9 +75,10 @@ Begin VB.Form frmAddExam
             Strikethrough   =   0   'False
          EndProperty
          Height          =   405
+         ItemData        =   "frmAddExam.frx":0000
          Left            =   3720
-         Locked          =   -1  'True
-         TabIndex        =   25
+         List            =   "frmAddExam.frx":0002
+         TabIndex        =   24
          Top             =   360
          Width           =   615
       End
@@ -76,7 +95,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   255
          Left            =   5160
-         TabIndex        =   24
+         TabIndex        =   23
          Top             =   600
          Width           =   1095
       End
@@ -84,7 +103,7 @@ Begin VB.Form frmAddExam
          Height          =   375
          IMEMode         =   3  'DISABLE
          Left            =   7440
-         TabIndex        =   23
+         TabIndex        =   22
          Top             =   360
          Width           =   615
       End
@@ -92,7 +111,7 @@ Begin VB.Form frmAddExam
          Caption         =   "保存"
          Height          =   375
          Left            =   8160
-         TabIndex        =   22
+         TabIndex        =   21
          Top             =   360
          Width           =   735
       End
@@ -100,7 +119,7 @@ Begin VB.Form frmAddExam
          Height          =   270
          IMEMode         =   3  'DISABLE
          Left            =   5760
-         TabIndex        =   21
+         TabIndex        =   20
          Top             =   225
          Width           =   855
       End
@@ -108,7 +127,7 @@ Begin VB.Form frmAddExam
          Height          =   375
          IMEMode         =   3  'DISABLE
          Left            =   1560
-         TabIndex        =   20
+         TabIndex        =   19
          Top             =   1080
          Width           =   735
       End
@@ -116,7 +135,7 @@ Begin VB.Form frmAddExam
          Height          =   375
          IMEMode         =   3  'DISABLE
          Left            =   3960
-         TabIndex        =   19
+         TabIndex        =   18
          Top             =   1080
          Width           =   735
       End
@@ -124,7 +143,7 @@ Begin VB.Form frmAddExam
          Height          =   375
          IMEMode         =   3  'DISABLE
          Left            =   2160
-         TabIndex        =   18
+         TabIndex        =   17
          Top             =   1680
          Width           =   735
       End
@@ -132,7 +151,7 @@ Begin VB.Form frmAddExam
          Height          =   375
          IMEMode         =   3  'DISABLE
          Left            =   2160
-         TabIndex        =   17
+         TabIndex        =   16
          Top             =   2160
          Width           =   735
       End
@@ -140,26 +159,9 @@ Begin VB.Form frmAddExam
          Height          =   375
          IMEMode         =   3  'DISABLE
          Left            =   2160
-         TabIndex        =   16
+         TabIndex        =   15
          Top             =   2640
          Width           =   735
-      End
-      Begin VB.CommandButton cmdCheck 
-         Caption         =   "检查试题"
-         BeginProperty Font 
-            Name            =   "微软雅黑"
-            Size            =   9
-            Charset         =   134
-            Weight          =   400
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   375
-         Left            =   120
-         TabIndex        =   15
-         Top             =   3240
-         Width           =   1695
       End
       Begin VB.CommandButton cmdSubmit 
          Caption         =   "提交"
@@ -173,7 +175,7 @@ Begin VB.Form frmAddExam
             Strikethrough   =   0   'False
          EndProperty
          Height          =   375
-         Left            =   7080
+         Left            =   120
          TabIndex        =   14
          Top             =   3240
          Width           =   1695
@@ -192,7 +194,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   375
          Left            =   120
-         TabIndex        =   39
+         TabIndex        =   38
          Top             =   360
          Width           =   1455
       End
@@ -210,7 +212,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   375
          Left            =   3360
-         TabIndex        =   38
+         TabIndex        =   37
          Top             =   360
          Width           =   255
       End
@@ -228,7 +230,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   375
          Left            =   4320
-         TabIndex        =   37
+         TabIndex        =   36
          Top             =   360
          Width           =   495
       End
@@ -246,7 +248,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   375
          Left            =   6720
-         TabIndex        =   36
+         TabIndex        =   35
          Top             =   360
          Width           =   735
       End
@@ -264,7 +266,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   255
          Left            =   4800
-         TabIndex        =   35
+         TabIndex        =   34
          Top             =   240
          Width           =   900
       End
@@ -288,7 +290,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   330
          Left            =   120
-         TabIndex        =   34
+         TabIndex        =   33
          Top             =   1080
          Width           =   1440
       End
@@ -306,7 +308,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   330
          Left            =   2520
-         TabIndex        =   33
+         TabIndex        =   32
          Top             =   1080
          Width           =   1440
       End
@@ -330,7 +332,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   330
          Left            =   120
-         TabIndex        =   32
+         TabIndex        =   31
          Top             =   1680
          Width           =   1920
       End
@@ -348,7 +350,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   330
          Left            =   120
-         TabIndex        =   31
+         TabIndex        =   30
          Top             =   2160
          Width           =   1920
       End
@@ -366,7 +368,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   330
          Left            =   120
-         TabIndex        =   30
+         TabIndex        =   29
          Top             =   2640
          Width           =   1920
       End
@@ -388,7 +390,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   255
          Left            =   1080
-         TabIndex        =   29
+         TabIndex        =   28
          Top             =   3720
          Width           =   7815
       End
@@ -405,7 +407,7 @@ Begin VB.Form frmAddExam
          EndProperty
          Height          =   255
          Left            =   120
-         TabIndex        =   28
+         TabIndex        =   27
          Top             =   3720
          Width           =   975
       End
@@ -441,7 +443,7 @@ Begin VB.Form frmAddExam
          Top             =   360
          Width           =   3135
       End
-      Begin VB.TextBox Text2 
+      Begin VB.TextBox txtExamTime 
          Height          =   375
          Left            =   5520
          TabIndex        =   4
@@ -483,7 +485,7 @@ Begin VB.Form frmAddExam
             Italic          =   0   'False
             Strikethrough   =   0   'False
          EndProperty
-         Format          =   9502721
+         Format          =   112984065
          CurrentDate     =   41976
       End
       Begin MSComCtl2.DTPicker dtExamDate2 
@@ -504,8 +506,18 @@ Begin VB.Form frmAddExam
             Italic          =   0   'False
             Strikethrough   =   0   'False
          EndProperty
-         Format          =   9502722
-         CurrentDate     =   41976
+         CustomFormat    =   "HH:mm:ss"
+         Format          =   112984067
+         UpDown          =   -1  'True
+         CurrentDate     =   .5
+      End
+      Begin MPQCONTROLLib.MpqControl a 
+         Left            =   360
+         Top             =   360
+         _Version        =   65542
+         _ExtentX        =   1085
+         _ExtentY        =   661
+         _StockProps     =   0
       End
       Begin VB.Label Label3 
          AutoSize        =   -1  'True
@@ -625,13 +637,19 @@ Private Sub cmdbrowse_Click()
     txtTestPath.Text = cd.FileName
 End Sub
 
+Private Sub cmdCancel_Click()
+    Unload Me
+End Sub
+
 Private Sub cmdOK_Click()
     On Error GoTo myerr
     Dim i As Integer
+    cboChoice.Clear
     For i = 1 To CLng(txtChoiceCount.Text)
         cboChoice.AddItem i
     Next
-    ReDim Preserve ChoiceCfg(CLng(txtChoiceCount.Text))
+    ReDim ChoiceCfg(CLng(txtChoiceCount.Text) - 1)
+    cboChoice.ListIndex = 0
     Exit Sub
 myerr:
     MsgBox "请输入正确的数值", vbCritical
@@ -639,20 +657,59 @@ End Sub
 
 Private Sub cmdSaveChoice_Click()
     On Error GoTo myerr
-    ChoiceCfg(CLng(cboChoice.Text)).MutiSelect = chkMutiSelect.Value
-    ChoiceCfg(CLng(cboChoice.Text)).TrueAnswer = txtTrueAnswer.Text
-    ChoiceCfg(CLng(cboChoice.Text)).ChooseCount = CLng(txtChooseCount.Text)
+    ChoiceCfg(CLng(cboChoice.Text) - 1).MutiSelect = chkMutiSelect.Value
+    ChoiceCfg(CLng(cboChoice.Text) - 1).TrueAnswer = txtTrueAnswer.Text
+    ChoiceCfg(CLng(cboChoice.Text) - 1).ChooseCount = CLng(txtChooseCount.Text)
     lblStatus.Caption = "保存成功"
+    If cboChoice.ListIndex < cboChoice.ListCount - 1 Then
+        cboChoice.ListIndex = cboChoice.ListIndex + 1
+    End If
     Exit Sub
 myerr:
     MsgBox "请输入正确的数值", vbCritical
 End Sub
 
 Private Sub cmdSubmit_Click()
-
-End Sub
-
-Private Sub Form_Load()
+    
+    Dim i As Integer
+    Dim tf As TestInformation
+    Dim sData As String, Length As Long
+    For i = 1 To frmAdmin.lstExamInformation.ListItems.Count
+        If txtSubjectNo.Text = frmAdmin.lstExamInformation.ListItems(i).SubItems(1) Then
+            MsgBox "考试号已存在！", vbCritical
+            Exit Sub
+        End If
+    Next
+    If txtSubject.Text = "" Or txtExamTime.Text = "" Or txtTestPath.Text = "" Or txtChoiceScore.Text = "" Or txtFillBlankScore.Text = "" Or txtAnswerScore.Text = "" Or txtFillBlankCount.Text = "" Or txtAnswerCount.Text = "" Then
+        MsgBox "信息未填写完成", vbCritical
+        Exit Sub
+    End If
+    For i = 0 To UBound(ChoiceCfg)
+        If ChoiceCfg(i).ChooseCount = 0 Or ChoiceCfg(i).TrueAnswer = "" Then
+            MsgBox "请完善选择题答案", vbCritical
+            Exit Sub
+        End If
+    Next
+    '-------------------------------打包试题信息-------------------------------------------------------------------
+    tf.AnswerCount = CLng(txtAnswerCount.Text)
+    tf.AnswerScore = CLng(txtAnswerScore.Text)
+    tf.ChoiceCount = CLng(txtChoiceCount.Text)
+    tf.ChoiceScore = CLng(txtChoiceScore.Text)
+    tf.DateTime = dtExamDate.Value & " " & dtExamDate2.Value
+    tf.ExamTime = CLng(txtExamTime.Text)
+    tf.FillBlankCount = CLng(txtFillBlankCount.Text)
+    tf.FillBlankScore = CLng(txtFillBlankScore.Text)
+    tf.Subject = txtSubject.Text
+    tf.SubjectNo = CLng(txtSubjectNo.Text)
+    WriteTestConfigFile AppPath & "temp\Config.ini", tf, ChoiceCfg
+    CompressTestFile AppPath & "temp\Config.ini", txtTestPath.Text, AppPath & "temp\Exam.bin", a
+    '-------------------发送试题信息-------------------------------------
+    frmLogin.sckClient.SendData CS_MSG_ADD_EXAM
+    sData = tf.SubjectNo & "|" & tf.Subject & "|" & tf.DateTime & "|" & tf.ExamTime
+    Length = Len(sData)
+    frmLogin.sckClient.SendData Length
+    frmLogin.sckClient.SendData sData
+    frmLogin.sckClient.SendData "ashdashdjkashdkjashdasjkdhsadkjasdhkjh"
+    
     
 End Sub
-

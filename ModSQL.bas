@@ -91,7 +91,7 @@ Public Function SQLQueryExamInformation(ManageTableName As String, InfoTableName
     mysql_rs.CursorLocation = adUseClient
     '--------------------------
     mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
-    mysql_rs.Open "SELECT * FROM " & ManageTableName & " WHERE ClassNo = " & AddQueto(ClassNo), mysql_conn
+    mysql_rs.Open "SELECT * FROM " & ManageTableName, mysql_conn                '& " WHERE ClassNo = " & AddQueto(ClassNo), mysql_conn
     Dim i As Long
     If mysql_rs.RecordCount > 0 Then
         For i = 1 To mysql_rs.RecordCount
@@ -100,7 +100,7 @@ Public Function SQLQueryExamInformation(ManageTableName As String, InfoTableName
             ExamInfo(i - 1).ExamTime = mysql_rs(2)
             ExamInfo(i - 1).ExamName = mysql_rs(1)
             mysql_rs.MoveNext
-        Next
+        Next                                                                    '
         mysql_rs.Close
         For i = 0 To UBound(ExamInfo)
             mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
@@ -151,3 +151,43 @@ myerr:
     'MsgBox Err.Number & Err.Description
     SQLSetTeacherPassword = False
 End Function
+
+Public Function SQLAddExamInformation(ManageTableName As String, InfoTableName As String, ExamInfo As ExamInformation) As Boolean
+    On Error GoTo myerr
+    WaitForMysqlConnection
+    Dim mysql_rs As New ADODB.Recordset
+    mysql_rs.CursorLocation = adUseClient
+    '--------------------------
+    mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
+    mysql_rs.Open "INSERT INTO " & ManageTableName & " (`SubjectNo`, `SubjectName`, `ExamTime`, `ClassNo`) VALUES (" & AddQueto(ExamInfo.ExamID) & "," & AddQueto(ExamInfo.ExamName) & "," & AddQueto(ExamInfo.ExamTime) & "," & AddQueto("00000003") & ");", mysql_conn, adOpenKeyset, adLockPessimistic
+    mysql_rs.Open "INSERT INTO " & InfoTableName & "(`SubjectNo`, `ExamDate`, `ExamRoom`) VALUES (" & AddQueto(ExamInfo.ExamID) & "," & AddQueto(ExamInfo.ExamDataTime) & "," & AddQueto("2201") & ");", mysql_conn, adOpenKeyset, adLockPessimistic
+    SQLAddExamInformation = True
+    Exit Function
+myerr:
+    MsgBox Err.Number & Err.Description
+    SQLAddExamInformation = False
+End Function
+
+Public Function SQLDeleteExamInformation(ManageTableName As String, InfoTableName As String, ExamID As String) As Boolean
+    On Error GoTo myerr
+    WaitForMysqlConnection
+    Dim mysql_rs As New ADODB.Recordset
+    mysql_rs.CursorLocation = adUseClient
+    '--------------------------
+    mysql_rs.Open "SET NAMES GBK", mysql_conn, adOpenKeyset, adLockPessimistic
+    mysql_rs.Open "DELETE FROM " & ManageTableName & " WHERE (`SubjectNo`='" & ExamID & "')", mysql_conn, adOpenKeyset, adLockPessimistic
+    mysql_rs.Open "DELETE FROM " & InfoTableName & " WHERE (`SubjectNo`='" & ExamID & "')", mysql_conn, adOpenKeyset, adLockPessimistic
+    SQLDeleteExamInformation = True
+    Exit Function
+myerr:
+    MsgBox Err.Number & Err.Description
+    SQLDeleteExamInformation = False
+    
+End Function
+Public Function SQLAddStudentInformation()
+    
+End Function
+
+
+
+
